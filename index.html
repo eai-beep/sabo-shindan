@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>サボり診断</title>
+</head>
+<body>
+  <h1>サボり診断メーカー</h1>
+
+  <button onclick="showResult()">診断する</button>
+
+  <div id="result"></div>
+
+  <script>
+    function showResult() {
+      const results = [
+        "スマホ5時間・勉強0時間。完全にスマホ側の勝ち。",
+        "教科書は開かれたが、それ以上の進展はなかった。",
+        "テスト3日前なのに掃除が進行中。"
+      ];
+
+      const r = results[Math.floor(Math.random() * results.length)];
+      document.getElementById("result").innerText = r;
+    }
+  </script>
+</body>
+</html>
