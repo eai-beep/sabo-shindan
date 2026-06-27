@@ -16,25 +16,28 @@ body {
   justify-content: center;
   align-items: center;
 
-  min-height: 100vh;
+  padding: 20px;
 }
 
 .container {
   width: 390px;
-  min-height: 100vh;
+  height: 100dvh;
   background: #111;
   padding: 24px;
   box-sizing: border-box;
 
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
 
   border-radius: 20px;
+  overflow: hidden;
 }
 
 .title {
   font-size: 16px;
   opacity: 0.7;
+  text-align: center;
 }
 
 .center {
@@ -46,35 +49,48 @@ body {
 }
 
 .level {
-  font-size: 64px;
+  font-size: 72px;
   font-weight: 900;
   color: #ff4d4d;
 }
 
 .nickname {
-  font-size: 48px;
+  font-size: 44px;
   font-weight: 900;
-  margin-top: 20px;
+  margin-top: 16px;
 }
 
 .text {
   font-size: 20px;
   line-height: 1.6;
-  margin-top: 30px;
+  margin-top: 28px;
   color: #eaeaea;
   padding: 0 10px;
 }
 
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 button {
   width: 100%;
-  margin-top: 12px;
   padding: 14px;
   font-size: 16px;
   border: none;
   border-radius: 12px;
+  font-weight: bold;
+}
+
+.primary {
   background: #ff4d4d;
   color: white;
-  font-weight: bold;
+}
+
+.secondary {
+  background: #2a2a2a;
+  color: white;
 }
 </style>
 </head>
@@ -91,33 +107,60 @@ button {
     <div class="text" id="text">診断ボタンを押してね</div>
   </div>
 
-  <button onclick="run()">もう一回診断</button>
-  <button onclick="shot()">スクショする</button>
+  <div class="buttons">
+    <button class="primary" onclick="run()">もう一回診断</button>
+    <button class="secondary" onclick="copyResult()">結果をコピー</button>
+  </div>
 
 </div>
 
 <script>
 
-// ■ ミーム辞書
+// ■ データ
 const data = [
   { level: 87, name: "偏差値溶かし職人", text: "スマホ6時間、勉強0時間。その集中力はTikTok専用。" },
-  { level: 42, name: "無限スクロール亡者", text: "二次不等式を後回しにして3時間スクロール。" },
-  { level: 99, name: "現実逃避マスター", text: "テスト3日前なのに掃除が進行中。" },
+  { level: 42, name: "無限スクロール亡者", text: "やることあるのに気づいたら3時間スクロール。" },
+  { level: 99, name: "現実逃避マスター", text: "テスト3日前なのに部屋が一番きれい。" },
   { level: 73, name: "夜更かし依存体", text: "午前2時の『明日やる』はもう習慣。" }
 ];
 
-// ■ 表示関数
+// ■ 現在表示
+let current = null;
+
+// ■ 表示
 function run(){
   const r = data[Math.floor(Math.random() * data.length)];
+  current = r;
 
   document.getElementById("level").innerText = "Lv. " + r.level;
   document.getElementById("nickname").innerText = r.name;
   document.getElementById("text").innerText = r.text;
 }
 
-// ■ スクショ誘導
-function shot(){
-  alert("この画面をスクショしてSNSに投稿してね");
+// ■ コピー（＝当たり判定）
+function copyResult(){
+
+  if(!current) return;
+
+  const text =
+`${current.level}
+${current.name}
+${current.text}`;
+
+  navigator.clipboard.writeText(text);
+
+  track("copy");
+}
+
+// ■ ログ（簡易分析）
+let stats = {
+  copy: 0,
+  show: 0
+};
+
+function track(type){
+  stats[type] = (stats[type] || 0) + 1;
+  console.log("stats:", stats);
 }
 
 </script>
