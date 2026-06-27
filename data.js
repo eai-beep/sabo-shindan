@@ -1,4 +1,4 @@
-condawindow.data = [
+window.data = [
   { id: 1, level: 1, name: "起動前人間", text: "まだ何もしてないのに疲れてる" },
   { id: 2, level: 5, name: "軽休憩民", text: "休憩がメインになってる" },
   { id: 3, level: 10, name: "スマホ吸引体", text: "気づいたらスマホを開いている" },
