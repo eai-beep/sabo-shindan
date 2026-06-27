@@ -11,21 +11,24 @@ body {
   font-family: "Arial Black", "Noto Sans JP", sans-serif;
   background: #0f0f0f;
   color: white;
+
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+
+  min-height: 100vh;
 }
 
 .container {
   width: 390px;
-  height: 844px;
+  min-height: 100vh;
   background: #111;
   padding: 24px;
   box-sizing: border-box;
+
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+
   border-radius: 20px;
 }
 
@@ -34,27 +37,37 @@ body {
   opacity: 0.7;
 }
 
+.center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
 .level {
-  font-size: 22px;
+  font-size: 64px;
+  font-weight: 900;
   color: #ff4d4d;
 }
 
 .nickname {
-  font-size: 40px;
+  font-size: 48px;
   font-weight: 900;
-  text-align: center;
   margin-top: 20px;
 }
 
 .text {
-  font-size: 18px;
+  font-size: 20px;
   line-height: 1.6;
-  text-align: center;
-  margin-top: 20px;
+  margin-top: 30px;
   color: #eaeaea;
+  padding: 0 10px;
 }
 
 button {
+  width: 100%;
+  margin-top: 12px;
   padding: 14px;
   font-size: 16px;
   border: none;
@@ -63,15 +76,7 @@ button {
   color: white;
   font-weight: bold;
 }
-
-.center {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
 </style>
-
 </head>
 
 <body>
@@ -86,40 +91,35 @@ button {
     <div class="text" id="text">診断ボタンを押してね</div>
   </div>
 
-  <button onclick="run()">診断する</button>
+  <button onclick="run()">もう一回診断</button>
+  <button onclick="shot()">スクショする</button>
 
 </div>
 
 <script>
+
+// ■ ミーム辞書
 const data = [
-  {
-    level: 87,
-    name: "偏差値溶かし職人",
-    text: "スマホ6時間、勉強0時間。その集中力、完全にTikTok専用だね。"
-  },
-  {
-    level: 42,
-    name: "無限スクロール亡者",
-    text: "二次不等式を後回しにして3時間スクロール。未来は見えてるよ。"
-  },
-  {
-    level: 99,
-    name: "現実逃避マスター",
-    text: "テスト3日前なのに掃除が進行中。逃げ方だけ一流だね。"
-  },
-  {
-    level: 73,
-    name: "夜更かし依存体",
-    text: "午前2時の『明日やる』宣言、今日で7回目だよ。"
-  }
+  { level: 87, name: "偏差値溶かし職人", text: "スマホ6時間、勉強0時間。その集中力はTikTok専用。" },
+  { level: 42, name: "無限スクロール亡者", text: "二次不等式を後回しにして3時間スクロール。" },
+  { level: 99, name: "現実逃避マスター", text: "テスト3日前なのに掃除が進行中。" },
+  { level: 73, name: "夜更かし依存体", text: "午前2時の『明日やる』はもう習慣。" }
 ];
 
-function run() {
+// ■ 表示関数
+function run(){
   const r = data[Math.floor(Math.random() * data.length)];
+
   document.getElementById("level").innerText = "Lv. " + r.level;
   document.getElementById("nickname").innerText = r.name;
   document.getElementById("text").innerText = r.text;
 }
+
+// ■ スクショ誘導
+function shot(){
+  alert("この画面をスクショしてSNSに投稿してね");
+}
+
 </script>
 
 </body>
