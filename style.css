@@ -1,55 +1,12 @@
 body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   background: #0b0b0f;
   color: white;
-  font-family: sans-serif;
   text-align: center;
-  padding: 80px 20px;
-}
-
-/* タイトル（小さくてOK） */
-.title {
-  font-size: 18px;
-  opacity: 0.4;
-}
-
-/* Lv（最重要） */
-#level {
-  font-size: 96px;
-  font-weight: 800;
-  margin-top: 40px;
-  letter-spacing: -2px;
-}
-
-/* 名前（かなり重要） */
-#name {
-  font-size: 40px;
-  font-weight: 700;
-  margin-top: 20px;
-}
-
-/* 本文（刺さりポイント） */
-#text {
-  margin-top: 40px;
-  font-size: 22px;
-  opacity: 0.95;
-  line-height: 1.6;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* CTA（弱く） */
-#cta {
-  margin-top: 80px;
-  font-size: 14px;
-  opacity: 0.4;
-}
-
-/* ボタン */
-button {
-  margin-top: 50px;
-  padding: 16px 24px;
-  font-size: 18px;
-  border: none;
-  border-radius: 12px;
+  padding: 20px;
 }
