@@ -1,214 +1,23 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>サボり診断</title>
-
-<style>
-body {
-  font-family: sans-serif;
-  background: #111;
-  color: white;
-  text-align: center;
-  padding: 20px;
-}
-
-/* タイトル */
-h1 {
-  font-size: 18px;
-  opacity: 0.7;
-  margin-top: 10px;
-}
-
-/* ローディング */
-#loading {
-  margin-top: 40px;
-  font-size: 16px;
-  opacity: 0.8;
-}
-
-/* 結果（主役） */
-#result {
-  margin-top: 60px;
-  font-size: 28px;
-  font-weight: bold;
-  line-height: 1.5;
-  padding: 20px;
-}
-
-/* ボタン */
-button {
-  padding: 12px 18px;
-  font-size: 14px;
-  border-radius: 10px;
-  border: none;
-  margin: 5px;
-  cursor: pointer;
-}
-
-/* アクション */
-#actions {
-  margin-top: 50px;
-  opacity: 0.85;
-}
-
-/* スクショ余白調整 */
-.spacer {
-  height: 20px;
-}
-</style>
+  <meta charset="UTF-8">
+  <title>サボり診断</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<h1>サボり診断メーカー</h1>
+  <h1 class="title">サボり診断</h1>
 
-<div class="spacer"></div>
+  <div id="level"></div>
+  <div id="name"></div>
+  <div id="text"></div>
 
-<button id="startBtn" onclick="run()">診断する</button>
+  <p id="cta">スクショしてTikTokへ</p>
 
-<div id="loading" style="display:none;">
-  あなたのサボり履歴を解析中...
-</div>
+  <button onclick="run()">診断する</button>
 
-<div id="result"></div>
-
-<div id="actions" style="display:none;">
-  <button onclick="retry()">もう一回</button>
-  <button onclick="share()">シェア</button>
-</div>
-
-<hr>
-
-<h2 style="font-size:14px;opacity:0.6;">ログ</h2>
-<button onclick="showStats()">見る</button>
-<div id="stats"></div>
-
-<hr>
-
-<h2 style="font-size:14px;opacity:0.6;">ランキング</h2>
-<button onclick="showTop()">表示</button>
-<div id="ranking"></div>
-
-<script>
-
-// ■ データ
-const data = [
-{level:87,name:"偏差値溶かし職人",text:"スマホ6時間、勉強0時間。完全にSNS専用脳。"},
-{level:42,name:"無限スクロール亡者",text:"気づいたら3時間スクロールしてる。"},
-{level:99,name:"現実逃避マスター",text:"テスト前なのに掃除が進む現象。"},
-{level:73,name:"夜更かし依存体",text:"午前2時の明日やる宣言。"},
-{level:90,name:"提出直前型人間",text:"締切30分前だけ本気出すタイプ。"},
-{level:78,name:"集中崩壊体",text:"5分集中→30分スマホループ。"},
-{level:85,name:"課題回避プロ",text:"勉強以外なら全部やる才能。"}
-];
-
-// ■ ログ
-let log = {
-  count: 0,
-  retry: 0,
-  share: 0,
-  results: [],
-  lastResult: null
-};
-
-// ■ 初期化
-(function init(){
-  const saved = localStorage.getItem("sabo_log");
-  if(saved) log = JSON.parse(saved);
-})();
-
-// ■ 診断
-function run() {
-
-  document.getElementById("loading").style.display = "block";
-  document.getElementById("startBtn").style.display = "none";
-
-  setTimeout(() => {
-
-    const r = data[Math.floor(Math.random() * data.length)];
-
-    document.getElementById("loading").style.display = "none";
-
-    document.getElementById("result").innerHTML =
-      "Lv." + r.level + " " + r.name + "<br><br>" + r.text;
-
-    document.getElementById("actions").style.display = "block";
-
-    log.count++;
-    log.lastResult = r;
-
-    log.results.push({
-      name: r.name,
-      level: r.level,
-      shared: 0,
-      retry: 0
-    });
-
-    save();
-
-  }, 1400);
-}
-
-// ■ 再診断
-function retry() {
-  run();
-}
-
-// ■ シェア
-function share() {
-  log.share++;
-
-  const idx = log.results.length - 1;
-  if (log.results[idx]) log.results[idx].shared++;
-
-  const text =
-    "サボり診断結果：Lv." +
-    log.lastResult.level + " " + log.lastResult.name;
-
-  navigator.clipboard.writeText(text);
-  alert("コピーした！");
-
-  save();
-}
-
-// ■ 保存
-function save() {
-  localStorage.setItem("sabo_log", JSON.stringify(log));
-}
-
-// ■ ログ表示
-function showStats() {
-  document.getElementById("stats").innerText =
-`診断回数：${log.count}
-再診断：${log.retry}
-シェア：${log.share}`;
-}
-
-// ■ ランキング
-function showTop() {
-  if (!log.results) return;
-
-  const scored = log.results.map(r => ({
-    ...r,
-    score: (r.shared * 5) + (r.retry * 2)
-  }));
-
-  scored.sort((a, b) => b.score - a.score);
-
-  const top = scored.slice(0, 5);
-
-  let html = "";
-
-  top.forEach((r, i) => {
-    html += `<div>${i+1}. ${r.name}（${r.score.toFixed(1)}）</div>`;
-  });
-
-  document.getElementById("ranking").innerHTML = html;
-}
-
-</script>
-
+  <script src="app.js"></script>
 </body>
 </html>
