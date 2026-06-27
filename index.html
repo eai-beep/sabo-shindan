@@ -1,124 +1,188 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>サボり診断</title>
 
 <style>
 body {
-  margin: 0;
-  font-family: "Arial Black", "Noto Sans JP", sans-serif;
-  background: #0f0f0f;
-  color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
-
-.container {
-  width: 390px;
-  height: 844px;
+  font-family: sans-serif;
   background: #111;
-  padding: 24px;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  border-radius: 20px;
-}
-
-.title {
-  font-size: 16px;
-  opacity: 0.7;
-}
-
-.level {
-  font-size: 22px;
-  color: #ff4d4d;
-}
-
-.nickname {
-  font-size: 40px;
-  font-weight: 900;
+  color: white;
   text-align: center;
-  margin-top: 20px;
+  padding: 30px;
 }
 
-.text {
-  font-size: 18px;
-  line-height: 1.6;
-  text-align: center;
-  margin-top: 20px;
-  color: #eaeaea;
-}
+h1 { font-size: 20px; }
 
 button {
-  padding: 14px;
+  padding: 12px 18px;
   font-size: 16px;
+  margin: 8px;
   border: none;
-  border-radius: 12px;
-  background: #ff4d4d;
-  color: white;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+#result {
+  margin-top: 20px;
+  font-size: 20px;
   font-weight: bold;
 }
 
-.center {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+.box {
+  margin-top: 20px;
+  padding: 10px;
+  border: 1px solid #333;
+}
+
+.small {
+  font-size: 12px;
+  opacity: 0.6;
 }
 </style>
-
 </head>
 
 <body>
 
-<div class="container">
+<h1>サボり診断メーカー</h1>
 
-  <div class="title">サボり診断メーカー</div>
+<button onclick="run()">診断する</button>
 
-  <div class="center">
-    <div class="level" id="level">Lv. --</div>
-    <div class="nickname" id="nickname">---</div>
-    <div class="text" id="text">診断ボタンを押してね</div>
-  </div>
+<div id="result"></div>
 
-  <button onclick="run()">診断する</button>
-
+<div>
+  <button id="shareBtn" onclick="share()" style="display:none;">シェア</button>
+  <button id="retryBtn" onclick="retry()" style="display:none;">もう一回</button>
 </div>
 
+<div class="small">スクショ推奨</div>
+
+<hr>
+
+<h2>ログダッシュボード</h2>
+<button onclick="showStats()">ログを見る</button>
+<div id="stats" class="box"></div>
+
+<hr>
+
+<h2>当たりワードランキング</h2>
+<button onclick="showTop()">ランキング表示</button>
+<div id="ranking" class="box"></div>
+
 <script>
+// ■ ワードデータ
 const data = [
-  {
-    level: 87,
-    name: "偏差値溶かし職人",
-    text: "スマホ6時間、勉強0時間。その集中力、完全にTikTok専用だね。"
-  },
-  {
-    level: 42,
-    name: "無限スクロール亡者",
-    text: "二次不等式を後回しにして3時間スクロール。未来は見えてるよ。"
-  },
-  {
-    level: 99,
-    name: "現実逃避マスター",
-    text: "テスト3日前なのに掃除が進行中。逃げ方だけ一流だね。"
-  },
-  {
-    level: 73,
-    name: "夜更かし依存体",
-    text: "午前2時の『明日やる』宣言、今日で7回目だよ。"
-  }
+{level:87,name:"偏差値溶かし職人",text:"スマホ6時間、勉強0時間。完全にSNS専用脳。"},
+{level:42,name:"無限スクロール亡者",text:"気づいたら3時間スクロールしてる。"},
+{level:99,name:"現実逃避マスター",text:"テスト前なのに掃除が進む現象。"},
+{level:73,name:"夜更かし依存体",text:"午前2時の明日やる宣言。"},
+{level:90,name:"提出直前型人間",text:"締切30分前だけ本気出すタイプ。"},
+{level:78,name:"集中崩壊体",text:"5分集中→30分スマホループ。"},
+{level:85,name:"課題回避プロ",text:"勉強以外なら全部やる才能。"}
 ];
 
+// ■ ログ
+let log = {
+  count: 0,
+  retry: 0,
+  share: 0,
+  results: [],
+  lastResult: null
+};
+
+// ■ 診断
 function run() {
   const r = data[Math.floor(Math.random() * data.length)];
-  document.getElementById("level").innerText = "Lv. " + r.level;
-  document.getElementById("nickname").innerText = r.name;
-  document.getElementById("text").innerText = r.text;
+
+  document.getElementById("result").innerHTML =
+    "Lv." + r.level + " " + r.name + "<br><br>" + r.text;
+
+  document.getElementById("shareBtn").style.display = "inline-block";
+  document.getElementById("retryBtn").style.display = "inline-block";
+
+  log.count++;
+  log.lastResult = r;
+
+  log.results.push({
+    name: r.name,
+    level: r.level,
+    shared: 0,
+    retry: 0
+  });
+
+  save();
+}
+
+// ■ 再生成
+function retry() {
+  log.retry++;
+
+  const idx = log.results.length - 1;
+  if (log.results[idx]) log.results[idx].retry++;
+
+  save();
+  run();
+}
+
+// ■ シェア
+function share() {
+  log.share++;
+
+  const idx = log.results.length - 1;
+  if (log.results[idx]) log.results[idx].shared++;
+
+  const text =
+    "サボり診断結果：Lv." +
+    log.lastResult.level + " " +
+    log.lastResult.name;
+
+  navigator.clipboard.writeText(text);
+  alert("コピーした！");
+
+  save();
+}
+
+// ■ 保存
+function save() {
+  localStorage.setItem("sabo_log", JSON.stringify(log));
+}
+
+// ■ 読み込み
+(function init(){
+  const saved = localStorage.getItem("sabo_log");
+  if (saved) log = JSON.parse(saved);
+})();
+
+// ■ ダッシュボード
+function showStats() {
+  document.getElementById("stats").innerText =
+`診断回数：${log.count}
+再生成回数：${log.retry}
+シェア回数：${log.share}`;
+}
+
+// ■ ランキング
+function showTop() {
+  if (!log.results) return;
+
+  const scored = log.results.map(r => ({
+    ...r,
+    score: (r.shared * 5) + (r.retry * 2)
+  }));
+
+  scored.sort((a, b) => b.score - a.score);
+
+  const top = scored.slice(0, 5);
+
+  let html = "";
+
+  top.forEach((r, i) => {
+    html += `<div>${i+1}. ${r.name}（score:${r.score}）</div>`;
+  });
+
+  document.getElementById("ranking").innerHTML = html;
 }
 </script>
 
