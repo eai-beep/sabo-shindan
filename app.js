@@ -1,4 +1,6 @@
-// ■■■ ミーム辞書（最小版） ■■■
+// =========================
+// ■ ミーム辞書（初期データ）
+// =========================
 
 const data = [
   {
@@ -24,12 +26,28 @@ const data = [
     text: "やる気が出たらやる、って言ってる時点で一生やらないやつ。",
     tier: "volatile",
     score: 0
+  },
+  {
+    id: "004",
+    level: 73,
+    name: "先延ばしプロ",
+    text: "締切までまだ時間ある、って思った瞬間から負けてる。",
+    tier: "volatile",
+    score: 0
   }
 ];
 
+// =========================
+// ■ 状態管理
+// =========================
+
 let lastId = null;
 
-// ■■■ ランダム（重み付き） ■■■
+const log = {};
+
+// =========================
+// ■ ワード選択（重み付きランダム）
+// =========================
 
 function pickWord(){
 
@@ -40,7 +58,7 @@ function pickWord(){
   pool.forEach(w => {
     const weight = w.tier === "core" ? 5 : 1;
 
-    for(let i=0;i<weight;i++){
+    for(let i = 0; i < weight; i++){
       weighted.push(w);
     }
   });
@@ -48,7 +66,9 @@ function pickWord(){
   return weighted[Math.floor(Math.random() * weighted.length)];
 }
 
-// ■■■ 実行 ■■■
+// =========================
+// ■ メイン実行
+// =========================
 
 function run(){
 
@@ -60,4 +80,56 @@ function run(){
   document.getElementById("text").innerText = r.text;
 
   track(r);
+}
+
+// =========================
+// ■ ログ記録
+// =========================
+
+function track(r){
+
+  if(!log[r.id]){
+    log[r.id] = {show:0, retry:0, share:0};
+  }
+
+  log[r.id].show++;
+
+  updateScore(r.id);
+}
+
+// =========================
+// ■ スコア計算
+// =========================
+
+function updateScore(id){
+
+  const l = log[id];
+  const w = data.find(d => d.id === id);
+
+  w.score =
+    (l.share * 5) +
+    (l.retry * 2) +
+    (l.show * 0.1);
+
+  evolve();
+}
+
+// =========================
+// ■ 進化ロジック
+// =========================
+
+function evolve(){
+
+  data.forEach(w => {
+
+    // 強いワードはコアへ
+    if(w.score > 1.5){
+      w.tier = "core";
+    }
+
+    // 弱いワードは可変枠へ
+    if(w.score < 0.3){
+      w.tier = "volatile";
+    }
+  });
 }
