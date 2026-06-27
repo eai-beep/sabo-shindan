@@ -11,11 +11,10 @@ body {
   font-family: "Arial Black", "Noto Sans JP", sans-serif;
   background: #0f0f0f;
   color: white;
-
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px;
+  height: 100dvh;
 }
 
 .container {
@@ -28,15 +27,11 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-
-  border-radius: 20px;
-  overflow: hidden;
 }
 
 .title {
-  font-size: 16px;
-  opacity: 0.7;
   text-align: center;
+  opacity: 0.7;
 }
 
 .center {
@@ -48,23 +43,20 @@ body {
 }
 
 .level {
-  font-size: 72px;
-  font-weight: 900;
+  font-size: 64px;
   color: #ff4d4d;
+  font-weight: 900;
 }
 
 .nickname {
-  font-size: 44px;
-  font-weight: 900;
-  margin-top: 16px;
+  font-size: 40px;
+  margin-top: 10px;
 }
 
 .text {
-  font-size: 20px;
+  margin-top: 20px;
+  font-size: 18px;
   line-height: 1.6;
-  margin-top: 28px;
-  color: #eaeaea;
-  padding: 0 10px;
 }
 
 .buttons {
@@ -74,37 +66,14 @@ body {
 }
 
 button {
-  width: 100%;
   padding: 14px;
-  font-size: 16px;
   border: none;
   border-radius: 12px;
   font-weight: bold;
 }
 
-.primary {
-  background: #ff4d4d;
-  color: white;
-}
-
-.secondary {
-  background: #2a2a2a;
-  color: white;
-}
-
-/* トースト */
-#toast {
-  position: fixed;
-  bottom: 40px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0,0,0,0.85);
-  padding: 12px 18px;
-  border-radius: 12px;
-  font-size: 14px;
-  opacity: 0;
-  transition: 0.25s;
-}
+.primary { background: #ff4d4d; color: white; }
+.secondary { background: #2a2a2a; color: white; }
 </style>
 </head>
 
@@ -115,165 +84,21 @@ button {
   <div class="title">サボり診断メーカー</div>
 
   <div class="center">
-    <div class="level" id="level">Lv. --</div>
-    <div class="nickname" id="nickname">ボタンを押してね</div>
-    <div class="text" id="text">診断結果がここに出る</div>
+    <div class="level" id="level">Lv --</div>
+    <div class="nickname" id="nickname">---</div>
+    <div class="text" id="text">ボタンを押してね</div>
   </div>
 
   <div class="buttons">
-    <button class="primary" id="mainBtn" onclick="run()">診断する</button>
-    <button class="secondary" onclick="copyResult()">結果をコピー</button>
+    <button class="primary" onclick="run()">診断する</button>
+    <button class="secondary" onclick="copyResult()">コピー</button>
     <button class="secondary" onclick="shareResult()">シェア</button>
   </div>
 
 </div>
 
-<div id="toast">コピーしました</div>
-
-<script>
-
-//////////////////////////////
-// ■ ベースワード
-//////////////////////////////
-
-const baseTexts = [
-"気づいたらスマホ開いてた",
-"やる前に休憩してる",
-"明日やるを今日も言ってる",
-"机に座っただけで満足",
-"5分のつもりが1時間",
-"集中する前に疲れる",
-"やる気が起動しない",
-"通知で人生止まる",
-"気づいたら夜",
-"勉強より掃除が進む",
-"一旦YouTube開く",
-"SNSチェックで1時間消える",
-"やろうと思った瞬間忘れる",
-"あとでやるが口癖",
-"何もしてないのに疲れてる"
-];
-
-//////////////////////////////
-// ■ 名前群
-//////////////////////////////
-
-const names = [
-"軽サボり民",
-"無限スクロール人間",
-"現実逃避マスター",
-"先延ばし職人",
-"人生省エネモード"
-];
-
-//////////////////////////////
-// ■ データ生成（1000）
-//////////////////////////////
-
-function generateData(){
-
-  const data = [];
-
-  for(let i = 0; i < 1000; i++){
-
-    data.push({
-      level: Math.floor(Math.random() * 100),
-      name: names[Math.floor(Math.random() * names.length)],
-      text: baseTexts[Math.floor(Math.random() * baseTexts.length)]
-    });
-
-  }
-
-  return data;
-}
-
-const data = generateData();
-
-//////////////////////////////
-// ■ 状態
-//////////////////////////////
-
-let current = null;
-
-//////////////////////////////
-// ■ 診断
-//////////////////////////////
-
-function run(){
-
-  const r = data[Math.floor(Math.random() * data.length)];
-  current = r;
-
-  document.getElementById("level").innerText = "Lv. " + r.level;
-  document.getElementById("nickname").innerText = r.name;
-  document.getElementById("text").innerText = r.text;
-
-  document.getElementById("mainBtn").innerText = "もう一回診断";
-}
-
-//////////////////////////////
-// ■ コピー
-//////////////////////////////
-
-function copyResult(){
-
-  if(!current) return;
-
-  const text =
-`Lv.${current.level}
-${current.name}
-${current.text}`;
-
-  navigator.clipboard.writeText(text);
-
-  showToast("コピーしました");
-}
-
-//////////////////////////////
-// ■ シェア
-//////////////////////////////
-
-function shareResult(){
-
-  if(!current) return;
-
-  const text =
-`【サボり診断】
-Lv.${current.level}
-${current.name}
-${current.text}
-
-#サボり診断`;
-
-  if(navigator.share){
-    navigator.share({
-      title: "サボり診断",
-      text: text
-    }).then(() => {
-      showToast("シェアしました🔥");
-    });
-  } else {
-    navigator.clipboard.writeText(text);
-    showToast("コピーしました（代替）");
-  }
-}
-
-//////////////////////////////
-// ■ トースト
-//////////////////////////////
-
-function showToast(msg){
-
-  const t = document.getElementById("toast");
-  t.innerText = msg;
-  t.style.opacity = 1;
-
-  setTimeout(() => {
-    t.style.opacity = 0;
-  }, 1200);
-}
-
-</script>
+<script src="data.js"></script>
+<script src="engine.js"></script>
 
 </body>
 </html>
