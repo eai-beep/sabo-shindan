@@ -1,23 +1,56 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html>
 <head>
   <meta charset="UTF-8">
   <title>サボり診断</title>
-  <link rel="stylesheet" href="style.css">
+
+  <style>
+    body {
+      background: #0b0b0f;
+      color: white;
+      text-align: center;
+      font-family: sans-serif;
+      padding-top: 200px;
+    }
+
+    button {
+      padding: 14px 20px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: none;
+    }
+
+    #result {
+      margin-top: 40px;
+      font-size: 22px;
+      line-height: 1.6;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  </style>
 </head>
 
 <body>
 
-  <h1 class="title">サボり診断</h1>
+  <h1>サボり診断メーカー</h1>
 
-  <div id="level"></div>
-  <div id="name"></div>
-  <div id="text"></div>
+  <button onclick="showResult()">診断する</button>
 
-  <p id="cta">スクショしてTikTokへ</p>
+  <div id="result"></div>
 
-  <button onclick="run()">診断する</button>
+  <script>
+    function showResult() {
+      const results = [
+        "スマホ5時間・勉強0時間。完全にスマホ側の勝ち。",
+        "教科書は開かれたが、それ以上の進展はなかった。",
+        "テスト3日前なのに掃除が進行中。"
+      ];
 
-  <script src="app.js"></script>
+      const r = results[Math.floor(Math.random() * results.length)];
+      document.getElementById("result").innerText = r;
+    }
+  </script>
+
 </body>
 </html>
