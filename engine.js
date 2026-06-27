@@ -1,6 +1,11 @@
 let current = null;
 
-function run(){
+window.run = function(){
+
+  if(!window.data){
+    alert("data.jsが読み込まれてない");
+    return;
+  }
 
   const r = data[Math.floor(Math.random() * data.length)];
   current = r;
@@ -8,22 +13,22 @@ function run(){
   document.getElementById("level").innerText = "Lv " + r.level;
   document.getElementById("nickname").innerText = r.name;
   document.getElementById("text").innerText = r.text;
-}
+};
 
-function copyResult(){
+window.copyResult = function(){
 
   if(!current) return;
 
-  const text =
+  navigator.clipboard.writeText(
 `Lv.${current.level}
 ${current.name}
-${current.text}`;
+${current.text}`
+  );
 
-  navigator.clipboard.writeText(text);
   alert("コピーしました");
-}
+};
 
-function shareResult(){
+window.shareResult = function(){
 
   if(!current) return;
 
@@ -37,6 +42,5 @@ ${current.text}`;
     navigator.share({ text });
   } else {
     navigator.clipboard.writeText(text);
-    alert("コピーしました");
   }
-}
+};
