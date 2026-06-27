@@ -92,6 +92,20 @@ button {
   background: #2a2a2a;
   color: white;
 }
+
+/* ■ トースト */
+#toast {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.8);
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  opacity: 0;
+  transition: 0.3s;
+}
 </style>
 </head>
 
@@ -103,8 +117,8 @@ button {
 
   <div class="center">
     <div class="level" id="level">Lv. --</div>
-    <div class="nickname" id="nickname">---</div>
-    <div class="text" id="text">診断ボタンを押してね</div>
+    <div class="nickname" id="nickname">ボタンを押してね</div>
+    <div class="text" id="text">診断結果がここに出る</div>
   </div>
 
   <div class="buttons">
@@ -114,9 +128,10 @@ button {
 
 </div>
 
+<div id="toast">コピーしました</div>
+
 <script>
 
-// ■ データ
 const data = [
   { level: 87, name: "偏差値溶かし職人", text: "スマホ6時間、勉強0時間。その集中力はTikTok専用。" },
   { level: 42, name: "無限スクロール亡者", text: "やることあるのに気づいたら3時間スクロール。" },
@@ -124,10 +139,9 @@ const data = [
   { level: 73, name: "夜更かし依存体", text: "午前2時の『明日やる』はもう習慣。" }
 ];
 
-// ■ 現在表示
 let current = null;
 
-// ■ 表示
+// ■ 診断
 function run(){
   const r = data[Math.floor(Math.random() * data.length)];
   current = r;
@@ -137,7 +151,7 @@ function run(){
   document.getElementById("text").innerText = r.text;
 }
 
-// ■ コピー（＝当たり判定）
+// ■ コピー
 function copyResult(){
 
   if(!current) return;
@@ -149,18 +163,19 @@ ${current.text}`;
 
   navigator.clipboard.writeText(text);
 
-  track("copy");
+  showToast("コピーしました");
 }
 
-// ■ ログ（簡易分析）
-let stats = {
-  copy: 0,
-  show: 0
-};
+// ■ トースト表示
+function showToast(msg){
 
-function track(type){
-  stats[type] = (stats[type] || 0) + 1;
-  console.log("stats:", stats);
+  const t = document.getElementById("toast");
+  t.innerText = msg;
+  t.style.opacity = 1;
+
+  setTimeout(() => {
+    t.style.opacity = 0;
+  }, 1200);
 }
 
 </script>
