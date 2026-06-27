@@ -132,17 +132,73 @@ button {
 
 <script>
 
-// ■ データ
-const data = [
-  { level: 87, name: "偏差値溶かし職人", text: "スマホ6時間、勉強0時間。その集中力はTikTok専用。" },
-  { level: 42, name: "無限スクロール亡者", text: "やることあるのに気づいたら3時間スクロール。" },
-  { level: 99, name: "現実逃避マスター", text: "テスト3日前なのに部屋が一番きれい。" },
-  { level: 73, name: "夜更かし依存体", text: "午前2時の『明日やる』はもう習慣。" }
+//////////////////////////////
+// ■ ベースワード
+//////////////////////////////
+
+const baseTexts = [
+"気づいたらスマホ開いてた",
+"やる前に休憩してる",
+"明日やるを今日も言ってる",
+"机に座っただけで満足",
+"5分のつもりが1時間",
+"集中する前に疲れる",
+"やる気が起動しない",
+"通知で人生止まる",
+"気づいたら夜",
+"勉強より掃除が進む",
+"一旦YouTube開く",
+"SNSチェックで1時間消える",
+"やろうと思った瞬間忘れる",
+"あとでやるが口癖",
+"何もしてないのに疲れてる"
 ];
+
+//////////////////////////////
+// ■ 名前群
+//////////////////////////////
+
+const names = [
+"軽サボり民",
+"無限スクロール人間",
+"現実逃避マスター",
+"先延ばし職人",
+"人生省エネモード"
+];
+
+//////////////////////////////
+// ■ データ生成（1000）
+//////////////////////////////
+
+function generateData(){
+
+  const data = [];
+
+  for(let i = 0; i < 1000; i++){
+
+    data.push({
+      level: Math.floor(Math.random() * 100),
+      name: names[Math.floor(Math.random() * names.length)],
+      text: baseTexts[Math.floor(Math.random() * baseTexts.length)]
+    });
+
+  }
+
+  return data;
+}
+
+const data = generateData();
+
+//////////////////////////////
+// ■ 状態
+//////////////////////////////
 
 let current = null;
 
+//////////////////////////////
 // ■ 診断
+//////////////////////////////
+
 function run(){
 
   const r = data[Math.floor(Math.random() * data.length)];
@@ -152,17 +208,19 @@ function run(){
   document.getElementById("nickname").innerText = r.name;
   document.getElementById("text").innerText = r.text;
 
-  // ボタン状態変更
   document.getElementById("mainBtn").innerText = "もう一回診断";
 }
 
+//////////////////////////////
 // ■ コピー
+//////////////////////////////
+
 function copyResult(){
 
   if(!current) return;
 
   const text =
-`${current.level}
+`Lv.${current.level}
 ${current.name}
 ${current.text}`;
 
@@ -171,7 +229,10 @@ ${current.text}`;
   showToast("コピーしました");
 }
 
+//////////////////////////////
 // ■ シェア
+//////////////////////////////
+
 function shareResult(){
 
   if(!current) return;
@@ -197,7 +258,10 @@ ${current.text}
   }
 }
 
-// ■ トースト表示
+//////////////////////////////
+// ■ トースト
+//////////////////////////////
+
 function showToast(msg){
 
   const t = document.getElementById("toast");
