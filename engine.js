@@ -1,3 +1,5 @@
+console.log("data =", window.data);
+
 let current = null;
 
 window.run = function(){
