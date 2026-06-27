@@ -15,7 +15,6 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-
   padding: 20px;
 }
 
@@ -93,18 +92,18 @@ button {
   color: white;
 }
 
-/* ■ トースト */
+/* トースト */
 #toast {
   position: fixed;
   bottom: 40px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(0,0,0,0.8);
-  padding: 10px 16px;
-  border-radius: 10px;
+  background: rgba(0,0,0,0.85);
+  padding: 12px 18px;
+  border-radius: 12px;
   font-size: 14px;
   opacity: 0;
-  transition: 0.3s;
+  transition: 0.25s;
 }
 </style>
 </head>
@@ -122,8 +121,9 @@ button {
   </div>
 
   <div class="buttons">
-    <button class="primary" onclick="run()">もう一回診断</button>
+    <button class="primary" id="mainBtn" onclick="run()">診断する</button>
     <button class="secondary" onclick="copyResult()">結果をコピー</button>
+    <button class="secondary" onclick="shareResult()">シェア</button>
   </div>
 
 </div>
@@ -132,6 +132,7 @@ button {
 
 <script>
 
+// ■ データ
 const data = [
   { level: 87, name: "偏差値溶かし職人", text: "スマホ6時間、勉強0時間。その集中力はTikTok専用。" },
   { level: 42, name: "無限スクロール亡者", text: "やることあるのに気づいたら3時間スクロール。" },
@@ -143,12 +144,16 @@ let current = null;
 
 // ■ 診断
 function run(){
+
   const r = data[Math.floor(Math.random() * data.length)];
   current = r;
 
   document.getElementById("level").innerText = "Lv. " + r.level;
   document.getElementById("nickname").innerText = r.name;
   document.getElementById("text").innerText = r.text;
+
+  // ボタン状態変更
+  document.getElementById("mainBtn").innerText = "もう一回診断";
 }
 
 // ■ コピー
@@ -164,6 +169,32 @@ ${current.text}`;
   navigator.clipboard.writeText(text);
 
   showToast("コピーしました");
+}
+
+// ■ シェア
+function shareResult(){
+
+  if(!current) return;
+
+  const text =
+`【サボり診断】
+Lv.${current.level}
+${current.name}
+${current.text}
+
+#サボり診断`;
+
+  if(navigator.share){
+    navigator.share({
+      title: "サボり診断",
+      text: text
+    }).then(() => {
+      showToast("シェアしました🔥");
+    });
+  } else {
+    navigator.clipboard.writeText(text);
+    showToast("コピーしました（代替）");
+  }
 }
 
 // ■ トースト表示
