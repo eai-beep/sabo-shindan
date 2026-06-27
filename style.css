@@ -3,41 +3,53 @@ body {
   color: white;
   font-family: sans-serif;
   text-align: center;
-  padding: 60px 20px;
+  padding: 80px 20px;
 }
 
+/* タイトル（小さくてOK） */
 .title {
+  font-size: 18px;
+  opacity: 0.4;
+}
+
+/* Lv（最重要） */
+#level {
+  font-size: 96px;
+  font-weight: 800;
+  margin-top: 40px;
+  letter-spacing: -2px;
+}
+
+/* 名前（かなり重要） */
+#name {
+  font-size: 40px;
+  font-weight: 700;
+  margin-top: 20px;
+}
+
+/* 本文（刺さりポイント） */
+#text {
+  margin-top: 40px;
+  font-size: 22px;
+  opacity: 0.95;
+  line-height: 1.6;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* CTA（弱く） */
+#cta {
+  margin-top: 80px;
   font-size: 14px;
   opacity: 0.4;
 }
 
-#level {
-  font-size: 64px;
-  font-weight: bold;
-  margin-top: 40px;
-}
-
-#name {
-  font-size: 26px;
-  margin-top: 10px;
-}
-
-#text {
-  margin-top: 30px;
-  font-size: 16px;
-  opacity: 0.9;
-  line-height: 1.6;
-}
-
-#cta {
-  margin-top: 60px;
-  font-size: 12px;
-  opacity: 0.4;
-}
-
+/* ボタン */
 button {
-  margin-top: 40px;
-  padding: 12px 20px;
+  margin-top: 50px;
+  padding: 16px 24px;
+  font-size: 18px;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
 }
