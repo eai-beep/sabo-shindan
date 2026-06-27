@@ -1,0 +1,43 @@
+body {
+  background: #0b0b0f;
+  color: white;
+  font-family: sans-serif;
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.title {
+  font-size: 14px;
+  opacity: 0.4;
+}
+
+#level {
+  font-size: 64px;
+  font-weight: bold;
+  margin-top: 40px;
+}
+
+#name {
+  font-size: 26px;
+  margin-top: 10px;
+}
+
+#text {
+  margin-top: 30px;
+  font-size: 16px;
+  opacity: 0.9;
+  line-height: 1.6;
+}
+
+#cta {
+  margin-top: 60px;
+  font-size: 12px;
+  opacity: 0.4;
+}
+
+button {
+  margin-top: 40px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 10px;
+}
