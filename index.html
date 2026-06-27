@@ -1,27 +1,133 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>サボり診断</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>サボり診断</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: "Arial Black", "Noto Sans JP", sans-serif;
+  background: #0f0f0f;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+/* スマホ固定キャンバス */
+.container {
+  width: 390px;
+  height: 844px;
+  background: #111;
+  padding: 24px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-radius: 20px;
+}
+
+/* 上部 */
+.title {
+  font-size: 16px;
+  opacity: 0.7;
+}
+
+/* レベル */
+.level {
+  font-size: 22px;
+  color: #ff4d4d;
+}
+
+/* メイン称号 */
+.nickname {
+  font-size: 40px;
+  font-weight: 900;
+  text-align: center;
+  margin-top: 20px;
+}
+
+/* 煽り本文 */
+.text {
+  font-size: 18px;
+  line-height: 1.6;
+  text-align: center;
+  margin-top: 20px;
+  color: #eaeaea;
+}
+
+/* ボタン */
+button {
+  padding: 14px;
+  font-size: 16px;
+  border: none;
+  border-radius: 12px;
+  background: #ff4d4d;
+  color: white;
+  font-weight: bold;
+}
+
+/* 中央エリア */
+.center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+</style>
+
 </head>
+
 <body>
-  <h1>サボり診断メーカー</h1>
 
-  <button onclick="showResult()">診断する</button>
+<div class="container">
 
-  <div id="result"></div>
+  <div class="title">サボり診断メーカー</div>
 
-  <script>
-    function showResult() {
-      const results = [
-        "スマホ5時間・勉強0時間。完全にスマホ側の勝ち。",
-        "教科書は開かれたが、それ以上の進展はなかった。",
-        "テスト3日前なのに掃除が進行中。"
-      ];
+  <div class="center">
+    <div class="level" id="level">Lv. --</div>
+    <div class="nickname" id="nickname">---</div>
+    <div class="text" id="text">診断ボタンを押してね</div>
+  </div>
 
-      const r = results[Math.floor(Math.random() * results.length)];
-      document.getElementById("result").innerText = r;
-    }
-  </script>
+  <button onclick="run()">診断する</button>
+
+</div>
+
+<script>
+const data = [
+  {
+    level: 87,
+    name: "偏差値溶かし職人",
+    text: "スマホ6時間、勉強0時間。その集中力、完全にTikTok専用だね。"
+  },
+  {
+    level: 42,
+    name: "無限スクロール亡者",
+    text: "二次不等式を後回しにして3時間スクロール。未来は見えてるよ。"
+  },
+  {
+    level: 99,
+    name: "現実逃避マスター",
+    text: "テスト3日前なのに掃除が進行中。逃げ方だけ一流だね。"
+  },
+  {
+    level: 73,
+    name: "夜更かし依存体",
+    text: "午前2時の『明日やる』宣言、今日で7回目だよ。"
+  }
+];
+
+function run() {
+  const r = data[Math.floor(Math.random() * data.length)];
+  document.getElementById("level").innerText = "Lv. " + r.level;
+  document.getElementById("nickname").innerText = r.name;
+  document.getElementById("text").innerText = r.text;
+}
+</script>
+
 </body>
 </html>
