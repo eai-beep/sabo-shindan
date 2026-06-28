@@ -1,87 +1,77 @@
-(() => {
+let current = null;
 
-  let current = null;
+// ★ここ超重要：必ず先に確認
+function assertData(){
+  if(!window.data || !Array.isArray(window.data)){
+    console.error("data missing", window.data);
+    return false;
+  }
+  return true;
+}
 
-  function getPool(){
-    // ★ここが重要：存在チェックを毎回やる
-    const data = window.data;
-    const rare = window.rarePool;
+function getRandom(){
 
-    if(!Array.isArray(data)){
-      console.error("data.js not loaded: window.data is", data);
-      return [];
-    }
+  const d = window.data;
+  const r = window.rarePool;
 
-    if(!Array.isArray(rare)){
-      console.error("data.js not loaded: window.rarePool is", rare);
-    }
+  const isRare = Math.random() < 0.05;
 
-    return { data, rare };
+  if(isRare && Array.isArray(r)){
+    return r[Math.floor(Math.random() * r.length)];
   }
 
-  function getRandomResult(){
+  return d[Math.floor(Math.random() * d.length)];
+}
 
-    const { data, rare } = getPool();
+// ★グローバルに直刺し（これ重要）
+window.run = function(){
 
-    if(Math.random() < 0.05 && rare?.length){
-      return rare[Math.floor(Math.random() * rare.length)];
-    }
-
-    return data[Math.floor(Math.random() * data.length)];
+  if(!assertData()){
+    alert("data.js読み込めてない or 壊れてる");
+    return;
   }
 
-  function run(){
+  const loading = document.getElementById("loading");
+  const main = document.getElementById("main");
 
-    const loading = document.getElementById("loading");
-    const main = document.getElementById("main");
+  loading.style.display = "block";
+  main.style.display = "none";
 
-    if(!window.data){
-      alert("data.jsが読み込まれてない（window.dataなし）");
-      return;
-    }
+  setTimeout(() => {
 
-    loading.style.display = "block";
-    main.style.display = "none";
+    const res = getRandom();
+    current = res;
 
-    setTimeout(() => {
+    document.getElementById("level").innerText = "Lv " + res.level;
+    document.getElementById("nickname").innerText = res.name;
+    document.getElementById("text").innerText = res.text;
 
-      const r = getRandomResult();
-      current = r;
+    loading.style.display = "none";
+    main.style.display = "flex";
 
-      document.getElementById("level").innerText = "Lv " + r.level;
-      document.getElementById("nickname").innerText = r.name;
-      document.getElementById("text").innerText = r.text;
+  }, 600);
+};
 
-      loading.style.display = "none";
-      main.style.display = "flex";
+window.copyResult = function(){
 
-    }, 800);
-  }
+  if(!current) return;
 
-  function copyResult(){
-    if(!current) return;
-
-    navigator.clipboard.writeText(
+  navigator.clipboard.writeText(
 `Lv.${current.level}
 ${current.name}
 ${current.text}`
-    );
+  );
 
-    alert("コピーしました");
-  }
+  alert("コピーしました");
+};
 
-  function shareResult(){
-    if(!current) return;
+window.shareResult = function(){
 
-    const url = `${location.origin}${location.pathname}?id=${current.id}`;
-    navigator.clipboard.writeText(url);
+  if(!current) return;
 
-    alert("リンクコピーしました");
-  }
+  const url = location.href.split("?")[0] + "?id=" + current.id;
 
-  // ★確実にグローバルへ出す
-  window.run = run;
-  window.copyResult = copyResult;
-  window.shareResult = shareResult;
+  navigator.clipboard.writeText(url);
 
-})();
+  alert("シェアURLコピー");
+};
