@@ -7,7 +7,11 @@ window.data = [
   { id: 6, level: 99, rank: "SSR", name: "サボり神", text: "努力という概念が未実装" }
 ];
 
-window.rarePool = [
-  { id: 9001, level: 777, rank: "SSR", name: "SSR サボり神", text: "時間を支配している存在" },
-  { id: 9002, level: 888, rank: "SSR", name: "時間バグ体", text: "1日が短く感じる現象そのもの" }
+const loadingMessages = [
+  "サボり指数解析中...",
+  "現実逃避レベル測定中...",
+  "やる気残量確認中...",
+  "スマホ依存度チェック中...",
+  "SSR発生確率計算中...",
+  "未来行動予測中..."
 ];
