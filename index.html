@@ -5,173 +5,237 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>サボり診断 MAX</title>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 <style>
 body {
   margin: 0;
-  font-family: sans-serif;
-  background: #111;
-  color: white;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  background: #0d0d11;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
 }
 
 .container {
-  max-width: 420px;
-  margin: 0 auto;
-  padding: 24px;
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* 変更点②: スクショ映えする「診断カード」のベースデザイン */
+.card-wrapper {
+  background: #16161e;
+  border-radius: 20px;
+  padding: 30px 24px;
+  border: 1px solid #2a2a3a;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  margin-bottom: 24px;
   text-align: center;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
-.title {
-  font-size: 20px;
-  margin-bottom: 20px;
+/* ランクごとの動的エフェクト（JSで切り替え） */
+.card-wrapper.rank-N { border-color: #4a4a5a; }
+.card-wrapper.rank-R { border-color: #00bcff; box-shadow: 0 0 15px rgba(0,188,255,0.2); }
+.card-wrapper.rank-SR { border-color: #ff007c; box-shadow: 0 0 20px rgba(255,0,124,0.3); }
+.card-wrapper.rank-SSR { 
+  border-color: #gold; 
+  background: linear-gradient(145deg, #16161e, #251f10);
+  box-shadow: 0 0 30px rgba(255,215,0,0.4);
+  animation: pulse 2s infinite alternate;
 }
 
-.level { font-size: 28px; margin: 10px 0; }
-.nickname { font-size: 22px; margin: 10px 0; }
-.text { margin: 10px 0; opacity: 0.8; }
+@keyframes pulse {
+  0% { box-shadow: 0 0 20px rgba(255,215,0,0.3); }
+  100% { box-shadow: 0 0 35px rgba(255,215,0,0.6); }
+}
 
+.card-title {
+  font-size: 14px;
+  letter-spacing: 4px;
+  color: #8a8a9a;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+}
+
+/* ランクバッジ */
+.rank-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 50px;
+  font-size: 12px;
+  font-weight: bold;
+  background: #2a2a3a;
+  color: #fff;
+  margin-bottom: 16px;
+}
+.rank-N .rank-badge { background: #4a4a5a; }
+.rank-R .rank-badge { background: #00bcff; color: #000; }
+.rank-SR .rank-badge { background: #ff007c; }
+.rank-SSR .rank-badge { background: gold; color: #000; animation: flash-badge 0.8s infinite alternate; }
+
+@keyframes flash-badge {
+  0% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+.level {
+  font-size: 40px;
+  font-weight: 900;
+  font-style: italic;
+  margin: 10px 0;
+  color: #fff;
+}
+.rank-SSR .level { color: gold; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
+
+.nickname {
+  font-size: 26px;
+  font-weight: bold;
+  margin: 15px 0;
+}
+.rank-SSR .nickname { text-shadow: 0 0 15px rgba(255,215,0,0.8); }
+
+.text {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #b5b5c5;
+  margin-top: 15px;
+  padding: 15px 0 0 0;
+  border-top: 1px solid #2a2a3a;
+}
+
+/* ボタン周り */
 button {
   width: 100%;
-  padding: 14px;
-  margin-top: 10px;
+  padding: 16px;
+  margin-top: 12px;
   border: none;
-  border-radius: 10px;
+  border-radius: 14px;
   font-size: 16px;
+  font-weight: bold;
   cursor: pointer;
+  transition: transform 0.1s, opacity 0.2s;
 }
+button:active { transform: scale(0.98); }
 
 .primary {
-  background: gold;
-  font-weight: bold;
-  color: black;
+  background: linear-gradient(90deg, #ff007c, #ff5e00);
+  color: white;
+  box-shadow: 0 4px 15px rgba(255,0,124,0.3);
+}
+
+.success {
+  background: #00bcff;
+  color: #000;
 }
 
 .secondary {
-  background: #333;
-  color: white;
+  background: #22222e;
+  color: #a0a0b0;
+  font-size: 14px;
+  padding: 12px;
 }
 
-#loading {
+/* システムレイヤー */
+#loading, #ssrOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.85);
   display: none;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  background: rgba(10,10,14,0.9);
   z-index: 100;
 }
+#loading.active, #ssrOverlay.active { display: flex; }
+#loadingText { font-size: 18px; letter-spacing: 2px; color: #00bcff; }
 
-#ssrOverlay {
-  position: fixed;
-  inset: 0;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  font-size: 48px;
-  background: rgba(0,0,0,0.85);
-  color: gold;
-  opacity: 0;
-  transition: opacity 0.2s;
-  z-index: 200;
-}
-
-#ssrOverlay.active,
-#loading.active {
-  display: flex;
-}
-
+#ssrOverlay { font-size: 40px; font-weight: bold; color: gold; z-index: 200; opacity: 0; transition: opacity 0.2s; }
 #ssrOverlay.show { opacity: 1; }
 
-/* effects */
+/* 全体演出 */
 .shake { animation: shake 0.4s ease; }
-.flash { animation: flash 0.6s ease; }
-
+.flash { animation: flash 0.5s ease; }
 @keyframes shake {
-  0% { transform: translate(0,0); }
-  25% { transform: translate(-5px,3px); }
-  50% { transform: translate(5px,-3px); }
-  100% { transform: translate(0,0); }
+  0%, 100% { transform: translate(0,0); }
+  20% { transform: translate(-8px,4px); }
+  40% { transform: translate(6px,-4px); }
+  60% { transform: translate(-4px,2px); }
+  80% { transform: translate(4px,-2px); }
 }
-
 @keyframes flash {
-  0% { background:#000; }
-  40% { background:#fff; }
-  100% { background:#111; }
+  0% { background: #000; }
+  30% { background: #3a1a3a; }
+  100% { background: #0d0d11; }
 }
 </style>
-
 </head>
 
 <body>
 
 <div id="loading">
-  <div id="loadingText"></div>
+  <div id="loadingText">解析中...</div>
 </div>
 
-<div id="ssrOverlay">？？？</div>
+<div id="ssrOverlay">✨ SSR確定 ✨</div>
 
 <div class="container">
 
-  <div class="title">サボり診断 MAX</div>
+  <div class="card-wrapper rank-N" id="diagnosticCard">
+    <div class="card-title">SABORI LOG</div>
+    <div class="rank-badge" id="badge">RANK N</div>
+    <div class="level" id="level">Lv --</div>
+    <div class="nickname" id="nickname">???</div>
+    <div class="text" id="text">ボタンをタップして脳内データをスキャンしてください。</div>
+  </div>
 
-  <div class="level" id="level">Lv --</div>
-  <div class="nickname" id="nickname">---</div>
-  <div class="text" id="text">ボタンを押してね</div>
-
-  <button class="primary" onclick="run()">診断する</button>
-  <button class="secondary" onclick="shareResult()">結果をシェアURLでコピー</button>
-  <button class="secondary" onclick="resetUIWithURLClear()">リセット</button>
+  <button class="primary" onclick="run()">診断を開始する</button>
+  <button class="success" onclick="saveAsImage()">カードを画像として保存</button>
+  <button class="secondary" onclick="shareResult()">結果をURLでシェア</button>
+  <button class="secondary" style="background:transparent; color:#555;" onclick="resetUIWithURLClear()">リセット</button>
 
 </div>
 
 <script>
-// 将来の300件拡張を見据え、一意のID（文字列等でも可）を定義
 const data = [
-  { id: 1, level: 1, rank: "N", name: "起動前人間", text: "まだ何もしてないのに疲れてる" },
-  { id: 5, level: 5, rank: "N", name: "軽休憩民", text: "休憩がメインになってる" },
-  { id: 10, level: 10, rank: "R", name: "スマホ吸引体", text: "気づいたらスマホを開いている" },
-  { id: 20, level: 20, rank: "R", name: "動画中毒者", text: "1本のつもりが止まらない" },
-  { id: 50, level: 50, rank: "SR", name: "現実逃避マスター", text: "気づいたら別のことしてる" },
-  { id: 99, level: 99, rank: "SSR", name: "サボり神", text: "努力という概念が未実装" }
+  { id: 1, level: 1, rank: "N", name: "起動前人間", text: "まだ何もしてないのに疲れてる。省エネモードのまま1日が終わる典型的な現代人。" },
+  { id: 5, level: 5, rank: "N", name: "軽休憩民", text: "5分休憩のつもりが本体。作業時間と休憩時間の比率が完全にバグっている。" },
+  { id: 10, level: 10, rank: "R", name: "スマホ吸引体", text: "無意識のうちに右手がスマホを掴んでいる。スクリーンタイムが限界突破の兆候。" },
+  { id: 20, level: 20, rank: "R", name: "動画中毒者", text: "「あと1本だけ」が命取り。ショート動画の無限ループから抜け出せないアリ地獄状態。" },
+  { id: 50, level: 50, rank: "SR", name: "現実逃避マスター", text: "やるべきことを目の前にすると、急に部屋の掃除やどうでもいい調べ物を始める天才。" },
+  { id: 99, level: 99, rank: "SSR", name: "サボり神", text: "努力という概念が脳内アップデートにより未実装。存在しているだけで100点満点。" }
 ];
 
-const loadingMessages = [
-  "解析中...",
-  "診断中...",
-  "未来計算中...",
-  "サボり度測定中..."
-];
-
+const loadingMessages = ["ニューロン接続中...", "サボり遺伝子解析中...", "脳内ログ抽出中...", "言い訳データベース照合中..."];
 let state = "idle";
 let loadingInterval;
 let lastResult = null;
 
-// ■ 拡張機能: ページ読み込み時にURLパラメータをチェックして復元
 window.addEventListener("DOMContentLoaded", () => {
   const urlParams = new URLSearchParams(window.location.search);
   const sharedId = urlParams.get("id");
-
   if (sharedId) {
-    // パラメータのIDに一致するデータを検索
     const sharedData = data.find(item => item.id == sharedId);
     if (sharedData) {
       lastResult = sharedData;
-      showResult(sharedData); // 共有時は演出なしで即表示（UX快適化）
+      showResult(sharedData);
     }
   }
 });
 
 function run() {
   if (state !== "idle") return;
-
   state = "loading";
-  resetUI();
-
+  
   startLoading(() => {
     const result = data[Math.floor(Math.random() * data.length)];
     lastResult = result;
 
-    // ブラウザのURLバーを、診断されたIDのURLにこっそり書き換える（ページはリロードされない）
     const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + `?id=${result.id}`;
     window.history.pushState({ path: newUrl }, '', newUrl);
 
@@ -185,16 +249,14 @@ function run() {
 function startLoading(done) {
   const loading = document.getElementById("loading");
   const text = document.getElementById("loadingText");
-
   loading.classList.add("active");
 
   let i = 0;
   text.textContent = loadingMessages[0];
-
   loadingInterval = setInterval(() => {
     i++;
     text.textContent = loadingMessages[i % loadingMessages.length];
-  }, 120);
+  }, 150);
 
   setTimeout(() => {
     clearInterval(loadingInterval);
@@ -204,18 +266,26 @@ function startLoading(done) {
 }
 
 function showResult(r) {
+  const card = document.getElementById("diagnosticCard");
+  
+  // 前のランククラスを全部剥がして新しいクラスを適用
+  card.className = "card-wrapper rank-" + r.rank;
+  
+  document.getElementById("badge").textContent = "RANK " + r.rank;
   document.getElementById("level").textContent = "Lv " + r.level;
   document.getElementById("nickname").textContent = r.name;
   document.getElementById("text").textContent = r.text;
 }
 
 function resetUI() {
+  const card = document.getElementById("diagnosticCard");
+  card.className = "card-wrapper rank-N";
+  document.getElementById("badge").textContent = "RANK N";
   document.getElementById("level").textContent = "Lv --";
-  document.getElementById("nickname").textContent = "---";
-  document.getElementById("text").textContent = "ボタンを押してね";
+  document.getElementById("nickname").textContent = "???";
+  document.getElementById("text").textContent = "ボタンをタップして脳内データをスキャンしてください。";
 }
 
-// リセット時はURLのパラメータも綺麗に消す設計
 function resetUIWithURLClear() {
   resetUI();
   lastResult = null;
@@ -224,8 +294,8 @@ function resetUIWithURLClear() {
 }
 
 function playFx(result, callback) {
-  playShake();
-  playFlash();
+  document.body.classList.add("shake", "flash");
+  setTimeout(() => document.body.classList.remove("shake", "flash"), 500);
 
   if (result.rank === "SSR") {
     playSSR(callback);
@@ -234,62 +304,60 @@ function playFx(result, callback) {
   }
 }
 
-function playShake() {
-  document.body.classList.add("shake");
-  setTimeout(() => document.body.classList.remove("shake"), 400);
-}
-
-function playFlash() {
-  document.body.classList.add("flash");
-  setTimeout(() => document.body.classList.remove("flash"), 600);
-}
-
 function playSSR(callback) {
   const overlay = document.getElementById("ssrOverlay");
-
   overlay.classList.add("active");
   setTimeout(() => overlay.classList.add("show"), 10);
 
   setTimeout(() => {
-    overlay.textContent = "✨ SSR確定 ✨";
-  }, 500);
-
-  setTimeout(() => {
     overlay.classList.remove("show");
-
     setTimeout(() => {
       overlay.classList.remove("active");
-      overlay.textContent = "？？？";
       callback();
     }, 200);
   }, 1200);
 }
 
-/* ■ シェア機能（URL復元対応版） */
-function shareResult() {
+/* 📸 変更点③: html2canvas を使った「バズ用画像生成」ロジック */
+function saveAsImage() {
   if (!lastResult) {
-    alert("まだ診断してないよ！");
+    alert("まだ診断していません！");
     return;
   }
 
-  // 現在のURL（?id=xx 付き）を取得
+  const card = document.getElementById("diagnosticCard");
+
+  // html2canvasでカード部分を高画質で撮影
+  html2canvas(card, {
+    backgroundColor: "#0d0d11", // 背景色を固定して綺麗に抜く
+    scale: 2, // 2倍の解像度で生成（スマホでボケない対策）
+    logging: false,
+    useCORS: true
+  }).then(canvas => {
+    // 画像データ（Base64）に変換
+    const imageData = canvas.toDataURL("image/png");
+    
+    // ダウンロード用の見えないリンクを作ってクリックさせる
+    const link = document.createElement("a");
+    link.href = imageData;
+    link.download = `sabori_lv${lastResult.level}.png`;
+    link.click();
+  }).catch(err => {
+    alert("画像の生成に失敗しました。スクショを撮ってシェアしてね！");
+  });
+}
+
+function shareResult() {
+  if (!lastResult) {
+    alert("まだ診断していません！");
+    return;
+  }
   const shareUrl = window.location.href;
+  const text = `【サボり診断 MAX】\n結果：${lastResult.name} (Lv ${lastResult.level})\n「${lastResult.text}」\n\n👇ここから脳内スキャンを実行\n${shareUrl}`;
 
-  const text =
-`【サボり診断 MAX】
-結果：${lastResult.name} (Lv ${lastResult.level})
-「${lastResult.text}」
-
-👇あなたのサボり度を測定する
-${shareUrl}`;
-
-  navigator.clipboard.writeText(text)
-    .then(() => {
-      alert("結果と共有URLをコピーしました！SNSに貼り付けてね！");
-    })
-    .catch(() => {
-      alert("コピーに失敗しました。URLはこちらです：\n" + shareUrl);
-    });
+  navigator.clipboard.writeText(text).then(() => {
+    alert("結果テキストとURLをコピーしました！XやLINEに貼り付けてね！");
+  });
 }
 </script>
 
