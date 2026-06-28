@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>サボり診断 MAX</title>
 
-<!-- html2canvas（無料） -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <style>
@@ -23,11 +22,7 @@ body {
   text-align: center;
 }
 
-.title {
-  font-size: 20px;
-  margin-bottom: 20px;
-}
-
+.title { font-size: 20px; margin-bottom: 20px; }
 .level { font-size: 28px; margin: 10px 0; }
 .nickname { font-size: 22px; margin: 10px 0; }
 .text { margin: 10px 0; opacity: 0.8; }
@@ -66,7 +61,7 @@ button {
   <div class="text" id="text">ボタンを押してね</div>
 
   <button class="primary" onclick="run()">診断する</button>
-  <button class="secondary" onclick="shareImage()">画像でシェア</button>
+  <button class="secondary" onclick="share()">シェア（URL＋画像）</button>
 
 </div>
 
@@ -83,21 +78,55 @@ const data = [
 let lastResult = null;
 
 /* =====================
+   URL復元
+===================== */
+function loadFromURL() {
+  const params = new URLSearchParams(location.search);
+  const r = params.get("result");
+
+  if (r) {
+    const found = data.find(d => d.level == r);
+    if (found) {
+      show(found);
+      lastResult = found;
+    }
+  }
+}
+
+/* =====================
    診断
 ===================== */
 function run() {
   const r = data[Math.floor(Math.random() * data.length)];
   lastResult = r;
+  show(r);
+}
 
+/* =====================
+   表示
+===================== */
+function show(r) {
   document.getElementById("level").textContent = "Lv " + r.level;
   document.getElementById("nickname").textContent = r.name;
   document.getElementById("text").textContent = r.text;
 }
 
 /* =====================
-   画像シェア（ここが本体）
+   シェア（URL＋画像）
 ===================== */
-function shareImage() {
+function share() {
+  if (!lastResult) {
+    alert("まだ診断してない");
+    return;
+  }
+
+  // URL生成
+  const url = `${location.origin}${location.pathname}?result=${lastResult.level}`;
+
+  // URLコピー
+  navigator.clipboard.writeText(url);
+
+  // 画像生成
   const target = document.getElementById("card");
 
   html2canvas(target, {
@@ -105,15 +134,22 @@ function shareImage() {
     scale: 2
   }).then(canvas => {
 
-    const url = canvas.toDataURL("image/png");
+    const img = canvas.toDataURL("image/png");
 
     const a = document.createElement("a");
-    a.href = url;
-    a.download = "sabori_diagnosis.png";
+    a.href = img;
+    a.download = "sabori.png";
     a.click();
+
+    alert("URLコピー＋画像保存 完了");
 
   });
 }
+
+/* =====================
+   起動時復元
+===================== */
+loadFromURL();
 </script>
 
 </body>
