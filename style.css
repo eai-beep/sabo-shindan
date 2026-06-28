@@ -18,12 +18,12 @@ body {
 
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
 }
 
 .title {
   text-align: center;
   opacity: 0.7;
-  margin-bottom: 10px;
 }
 
 .center {
@@ -41,7 +41,7 @@ body {
 }
 
 .nickname {
-  font-size: 36px;
+  font-size: 40px;
   margin-top: 10px;
 }
 
@@ -55,9 +55,6 @@ body {
   display: flex;
   flex-direction: column;
   gap: 10px;
-
-  margin-top: auto;
-  padding-bottom: 10px;
 }
 
 button {
@@ -67,12 +64,28 @@ button {
   font-weight: bold;
 }
 
-.primary {
-  background: #ff4d4d;
-  color: white;
+.primary { background: #ff4d4d; color: white; }
+.secondary { background: #2a2a2a; color: white; }
+
+.loading {
+  font-size: 18px;
+  opacity: 0.8;
+  animation: blink 0.8s infinite;
 }
 
-.secondary {
-  background: #2a2a2a;
-  color: white;
+.loadingText {
+  font-size: 14px;
+  margin-top: 10px;
+  color: #ff4d4d;
+  animation: blink 0.6s infinite;
+}
+
+.hidden {
+  display: none;
+}
+
+@keyframes blink {
+  0% { opacity: 0.2; }
+  50% { opacity: 1; }
+  100% { opacity: 0.2; }
 }
