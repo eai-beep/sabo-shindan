@@ -1,27 +1,26 @@
 let current = null;
 let isRunning = false;
 
+function resetUI() {
+  document.getElementById("level").innerText = "Lv --";
+  document.getElementById("nickname").innerText = "---";
+  document.getElementById("text").innerText = "ボタンを押してね";
+}
+
 function run() {
-  if (isRunning) return; // ★連打バグ防止
+  if (isRunning) return;
   isRunning = true;
 
   const loading = document.getElementById("loading");
   const loadingText = document.getElementById("loadingText");
 
-  const level = document.getElementById("level");
-  const nickname = document.getElementById("nickname");
-  const text = document.getElementById("text");
-
-  // ★完全リセット（ここが重要）
+  // ■① まず完全リセット（ここが本体）
+  resetUI();
   current = null;
-  level.innerText = "Lv --";
-  nickname.innerText = "---";
-  text.innerText = "";
 
-  // ★ロード表示
+  // ■② ロード開始
   loading.classList.remove("hidden");
   loadingText.classList.remove("hidden");
-
   loadingText.innerText = "";
 
   const interval = setInterval(() => {
@@ -29,27 +28,32 @@ function run() {
       loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
   }, 200);
 
-  const wait = 1200 + Math.random() * 700;
+  const wait = 1200 + Math.random() * 600;
 
   setTimeout(() => {
     clearInterval(interval);
 
     const result = pickResult();
 
-    // ★ロード終了
+    // ■③ ロード終了
     loading.classList.add("hidden");
     loadingText.classList.add("hidden");
 
-    // ★表示
-    current = result;
-    level.innerText = "Lv " + result.level;
-    nickname.innerText = result.name;
-    text.innerText = result.text;
+    // ■④ 結果表示
+    showResult(result);
 
     playRandomFx(result);
 
-    isRunning = false;
-
     history.replaceState(null, "", `?id=${result.id}`);
+
+    isRunning = false;
   }, wait);
+}
+
+function showResult(result) {
+  current = result;
+
+  document.getElementById("level").innerText = "Lv " + result.level;
+  document.getElementById("nickname").innerText = result.name;
+  document.getElementById("text").innerText = result.text;
 }
