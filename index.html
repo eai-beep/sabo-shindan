@@ -3,244 +3,237 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>サボり度測定コア MAX</title>
+<title>サボり度診断 MAX</title>
 
+<!-- 画面を画像化するライブラリ -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <style>
 body {
   margin: 0;
-  font-family: 'Consolas', 'Courier New', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
-  background: #06060a;
-  /* 変更点①: 背景に薄く近未来的なサイバーグリッドを配置 */
-  background-image: 
-    linear-gradient(rgba(18, 16, 26, 0.8) 0%, rgba(6, 6, 10, 1) 100%),
-    linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
-  background-size: 100% 100%, 20px 20px, 20px 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: #0b0b12;
+  /* 背景をダークディストピアから、少し遊び心のあるデジタルドット背景へ */
+  background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 16px 16px;
   color: #fff;
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  padding: 10px;
+  padding: 16px;
   box-sizing: border-box;
 }
 
 .container {
   width: 100%;
-  max-width: 420px;
+  max-width: 400px;
 }
 
-/* 変更点②: シンプルさを完全破壊した、情報密度の高いヘヴィ・カードデザイン */
+/* 📱 アプリ全体の最上部タイトル */
+.app-main-title {
+  text-align: center;
+  font-size: 16px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  color: #6a6a8a;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+}
+
+/* 🎴 カードデザイン：ソシャゲのレア確定リザルト画面風に昇華 */
 .card-wrapper {
-  background: #0e0e16;
-  border: 2px solid #1f1f30;
-  border-radius: 12px;
-  padding: 24px;
+  background: #131322;
+  border: 2px solid #23233b;
+  border-radius: 20px;
+  padding: 28px 24px;
   box-sizing: border-box;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 20px rgba(255,255,255,0.02);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.6);
   position: relative;
   overflow: hidden;
   margin-bottom: 20px;
 }
 
-/* 枠線のネオン発光（ランク別） */
-.card-wrapper.rank-N { border-color: #3e3e4f; box-shadow: 0 0 15px rgba(62,62,79,0.2); }
-.card-wrapper.rank-R { border-color: #00e5ff; box-shadow: 0 0 20px rgba(0,229,255,0.25), inset 0 0 15px rgba(0,229,255,0.05); }
-.card-wrapper.rank-SR { border-color: #ff0055; box-shadow: 0 0 25px rgba(255,0,85,0.3), inset 0 0 15px rgba(255,0,85,0.05); }
+/* ランク別：枠線と全体の輝きをよりビビッド（鮮やか）に */
+.card-wrapper.rank-N { border-color: #4a4a6a; }
+.card-wrapper.rank-R { border-color: #00d2ff; box-shadow: 0 0 20px rgba(0,210,255,0.3); }
+.card-wrapper.rank-SR { border-color: #ff007b; box-shadow: 0 0 25px rgba(255,0,123,0.4); }
 .card-wrapper.rank-SSR { 
   border-color: #ffb700; 
-  background: linear-gradient(135deg, #0e0e16 0%, #1c1505 100%);
-  box-shadow: 0 0 35px rgba(255,183,0,0.4), inset 0 0 20px rgba(255,183,0,0.1);
+  background: linear-gradient(135deg, #131322 0%, #2b200a 100%);
+  box-shadow: 0 0 35px rgba(255,183,0,0.5);
 }
 
-/* メカニカルなヘッダー領域 */
-.card-header {
+/* 💡 カード内ヘッダー：「サボり度診断」を明記！ */
+.card-header-title {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #fff;
   display: flex;
   justify-content: space-between;
-  font-size: 10px;
-  letter-spacing: 1px;
-  color: #52527a;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-  padding-bottom: 8px;
+  align-items: center;
+  border-bottom: 2px solid rgba(255,255,255,0.08);
+  padding-bottom: 12px;
   margin-bottom: 20px;
-  font-weight: bold;
 }
-.rank-R .card-header { color: #00bcff; }
-.rank-SR .card-header { color: #ff0055; }
-.rank-SSR .card-header { color: #ffb700; }
+.card-header-title span { font-size: 11px; color: #5a5a7a; font-weight: normal; }
 
-/* ビジュアルの主役：大きなランク＆レベル表示 */
+/* メイン表示エリア */
 .main-display {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .rank-badge {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 900;
-  padding: 4px 10px;
-  background: #1f1f30;
-  color: #8c8caa;
-  border-radius: 4px;
-  letter-spacing: 1px;
+  padding: 6px 14px;
+  background: #23233b;
+  color: #a0a0c0;
+  border-radius: 8px;
 }
-.rank-R .rank-badge { background: #00e5ff; color: #000; }
-.rank-SR .rank-badge { background: #ff0055; color: #fff; }
-.rank-SSR .rank-badge { background: #ffb700; color: #000; font-size: 14px; animation: pulse 1s infinite alternate; }
+.rank-R .rank-badge { background: #00d2ff; color: #000; }
+.rank-SR .rank-badge { background: #ff007b; color: #fff; }
+.rank-SSR .rank-badge { background: #ffb700; color: #000; animation: bounce 0.6s infinite alternate; }
 
-@keyframes pulse {
-  0% { transform: scale(1); box-shadow: 0 0 5px #ffb700; }
-  100% { transform: scale(1.05); box-shadow: 0 0 15px #ffb700; }
+@keyframes bounce {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-4px); }
 }
 
-/* レベルの超巨大化＋傾斜化 */
+/* レベル数字のインパクト化 */
 .level-zone {
-  text-align: right;
   line-height: 1;
 }
-.level-label {
-  font-size: 14px;
-  font-weight: bold;
-  color: #52527a;
-  text-transform: uppercase;
-  margin-right: 4px;
-}
 .level-num {
-  font-size: 64px;
+  font-size: 72px;
   font-weight: 900;
   font-family: 'Impact', 'Arial Black', sans-serif;
-  letter-spacing: -2px;
-  font-style: italic;
-  display: inline-block;
-  transform: skewX(-10deg);
+  letter-spacing: -1px;
+  color: #fff;
 }
-.rank-R .level-num { color: #00e5ff; text-shadow: 0 0 10px rgba(0,229,255,0.4); }
-.rank-SR .level-num { color: #ff0055; text-shadow: 0 0 12px rgba(255,0,85,0.4); }
-.rank-SSR .level-num { color: #ffb700; text-shadow: 0 0 20px rgba(255,183,0,0.6); }
+.rank-R .level-num { color: #00d2ff; }
+.rank-SR .level-num { color: #ff007b; }
+.rank-SSR .level-num { color: #ffb700; text-shadow: 0 0 15px rgba(255,183,0,0.5); }
 
-/* 二つ名 */
+/* キャラ名・二つ名 */
 .nickname {
-  font-size: 24px;
-  font-weight: bold;
-  letter-spacing: 1px;
+  font-size: 26px;
+  font-weight: 900;
   margin-bottom: 20px;
+  color: #fff;
 }
-.rank-SSR .nickname { color: #ffb700; text-shadow: 0 0 10px rgba(255,183,0,0.3); }
+.rank-SSR .nickname { color: #ffb700; }
 
-/* 変更点③: 画面の情報量をブチ上げる「3連ステータスメーター」 */
+/* 3連ステータスメーター（ポップで見やすい色合いに調整） */
 .status-monitor {
-  background: rgba(0,0,0,0.3);
-  border: 1px solid rgba(255,255,255,0.03);
-  border-radius: 6px;
-  padding: 14px;
+  background: rgba(0,0,0,0.25);
+  border-radius: 12px;
+  padding: 16px;
   margin-bottom: 20px;
 }
-.status-row {
-  margin-bottom: 10px;
-}
+.status-row { margin-bottom: 12px; }
 .status-row:last-child { margin-bottom: 0; }
 .status-meta {
   display: flex;
   justify-content: space-between;
-  font-size: 11px;
-  color: #8c8caa;
-  margin-bottom: 4px;
+  font-size: 12px;
+  color: #9a9ab5;
+  margin-bottom: 6px;
+  font-weight: bold;
 }
 .status-bar-bg {
-  height: 6px;
-  background: #151522;
-  border-radius: 3px;
+  height: 8px;
+  background: #1a1a2e;
+  border-radius: 4px;
   overflow: hidden;
 }
 .status-bar-fill {
   height: 100%;
-  width: 0%; /* JSで可変 */
-  background: #4e4e6a;
-  border-radius: 3px;
-  transition: width 0.5s ease-out;
+  width: 0%;
+  background: #5a5a7a;
+  border-radius: 4px;
+  transition: width 0.6s cubic-bezier(0.1, 1, 0.1, 1);
 }
-/* ランクごとのメーター色変化 */
-.rank-R .status-bar-fill { background: linear-gradient(90deg, #0088ff, #00e5ff); }
-.rank-SR .status-bar-fill { background: linear-gradient(90deg, #ff0055, #ff5500); }
+.rank-R .status-bar-fill { background: #00d2ff; }
+.rank-SR .status-bar-fill { background: #ff007b; }
 .rank-SSR .status-bar-fill { background: linear-gradient(90deg, #ff5500, #ffb700); }
 
-/* 説明テキスト */
+/* 解説テキスト */
 .analysis-text {
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.6;
-  color: #b5b5c5;
-  background: rgba(255,255,255,0.01);
-  border-left: 3px solid #3e3e4f;
-  padding: 10px 12px;
+  color: #c5c5d5;
+  text-align: left;
+  background: rgba(255,255,255,0.03);
+  padding: 14px;
+  border-radius: 10px;
 }
-.rank-R .analysis-text { border-left-color: #00e5ff; }
-.rank-SR .analysis-text { border-left-color: #ff0055; }
-.rank-SSR .analysis-text { border-left-color: #ffb700; background: rgba(255,183,0,0.02); }
 
-/* UI操作ボタン（フラット＆ソリッドに変貌） */
+/* ボタンUI（押しやすくて今風のフラットデザイン） */
 button {
   width: 100%;
   padding: 16px;
-  margin-top: 10px;
+  margin-top: 12px;
   border: none;
-  border-radius: 8px;
-  font-size: 15px;
+  border-radius: 12px;
+  font-size: 16px;
   font-weight: bold;
   cursor: pointer;
-  box-sizing: border-box;
-  letter-spacing: 1px;
+  transition: all 0.1s ease;
 }
+button:active { transform: scale(0.97); }
+
 .btn-main {
-  background: #fff;
-  color: #000;
-  box-shadow: 0 4px 15px rgba(255,255,255,0.1);
-}
-.btn-save {
-  background: #1f1f30;
+  background: linear-gradient(135deg, #00d2ff, #0088ff);
   color: #fff;
-  border: 1px solid #3e3e4f;
+  box-shadow: 0 4px 15px rgba(0,136,255,0.3);
 }
-.btn-save:hover { background: #2a2a3f; }
+.rank-SR-active .btn-main { background: linear-gradient(135deg, #ff007b, #9900ff); box-shadow: 0 4px 15px rgba(255,0,123,0.3); }
+.rank-SSR-active .btn-main { background: linear-gradient(135deg, #ffb700, #ff5500); box-shadow: 0 4px 15px rgba(255,183,0,0.3); }
+
+.btn-save {
+  background: #23233b;
+  color: #fff;
+  border: 1px solid #33335c;
+}
 .btn-sub {
   background: transparent;
-  color: #52527a;
+  color: #6a6a8a;
   font-size: 13px;
-  padding: 8px;
+  padding: 6px;
 }
 
-/* 演出用オーバーレイ */
+/* 演出レイヤー */
 #loading, #ssrOverlay {
   position: fixed;
   inset: 0;
   display: none;
   align-items: center;
   justify-content: center;
-  background: #06060a;
+  background: #0b0b12;
   z-index: 100;
 }
 #loading.active, #ssrOverlay.active { display: flex; }
-#loadingText { font-family: monospace; font-size: 16px; color: #ff0055; text-shadow: 0 0 10px rgba(255,0,85,0.5); }
+#loadingText { font-size: 18px; font-weight: bold; color: #00d2ff; letter-spacing: 1px; }
+
 #ssrOverlay { font-size: 36px; font-weight: 900; color: #ffb700; text-shadow: 0 0 20px #ffb700; z-index: 200; opacity: 0; transition: opacity 0.2s; }
 #ssrOverlay.show { opacity: 1; }
 
-/* 特殊演出クラス */
-.shake { animation: extreme-shake 0.3s linear; }
-.flash { animation: screen-flash 0.4s ease-out; }
-@keyframes extreme-shake {
+/* 振動・フラッシュ */
+.shake { animation: light-shake 0.3s ease; }
+.flash { animation: screen-flash 0.3s ease-out; }
+@keyframes light-shake {
   0%, 100% { transform: translate(0,0); }
-  10% { transform: translate(-6px, -2px); }
-  30% { transform: translate(5px, 4px); }
-  50% { transform: translate(-5px, -3px); }
-  70% { transform: translate(4px, 2px); }
-  90% { transform: translate(-2px, 1px); }
+  20%, 60% { transform: translate(-4px, 2px); }
+  40%, 80% { transform: translate(4px, -2px); }
 }
 @keyframes screen-flash {
-  0% { background: #ff0055; opacity: 0.5; }
-  100% { background: #06060a; opacity: 1; }
+  0% { background: #ffffff; opacity: 0.3; }
+  100% { background: #0b0b12; opacity: 1; }
 }
 </style>
 </head>
@@ -248,32 +241,35 @@ button {
 <body>
 
 <div id="loading">
-  <div id="loadingText">> SCANNING BRAIN_LOG...</div>
+  <div id="loadingText">診断データを生成中...</div>
 </div>
 
-<div id="ssrOverlay">⚡ GOD DETECTED ⚡</div>
+<div id="ssrOverlay">✨ SSR神確定 ✨</div>
 
 <div class="container">
 
+  <div class="app-main-title">SABORI CHECKER</div>
+
+  <!-- 📸 このカード画像の中に「サボり度診断」をハッキリ入れました！ -->
   <div class="card-wrapper rank-N" id="diagnosticCard">
-    <div class="card-header">
-      <span>SYS_LOG: ACTIVE</span>
+    
+    <div class="card-header-title">
+      サボり度診断
       <span id="serialNo">#000000</span>
     </div>
     
     <div class="main-display">
       <div class="rank-badge" id="badge">RANK N</div>
       <div class="level-zone">
-        <span class="level-label">Lv</span>
         <span class="level-num" id="level">--</span>
       </div>
     </div>
 
-    <div class="nickname" id="nickname">SYSTEM STANDBY</div>
+    <div class="nickname" id="nickname">診断未実行</div>
     
     <div class="status-monitor">
       <div class="status-row">
-        <div class="status-meta"><span>スマホ吸引率</span><span id="valA">0%</span></div>
+        <div class="status-meta"><span>スマホ依存度</span><span id="valA">0%</span></div>
         <div class="status-bar-bg"><div class="status-bar-fill" id="barA"></div></div>
       </div>
       <div class="status-row">
@@ -286,28 +282,27 @@ button {
       </div>
     </div>
 
-    <div class="analysis-text" id="text">下部のトリガーボタンを押して、脳内精神ログのスキャンおよびサボり因子の定量的測定を開始してください。</div>
+    <div class="analysis-text" id="text">ボタンを押してあなたの脳内サボり因子を測定してください。</div>
   </div>
 
-  <button class="btn-main" onclick="run()">診断を実行する</button>
+  <!-- 操作ボタン -->
+  <button class="btn-main" id="mainBtn" onclick="run()">診断する</button>
   <button class="btn-save" onclick="saveAsImage()">結果を画像として保存</button>
   <button class="btn-sub" onclick="shareResult()">結果URLをコピーしてシェア</button>
-  <button class="btn-sub" style="color: #333;" onclick="resetUIWithURLClear()">システム初期化</button>
 
 </div>
 
 <script>
-// 変更点④: 視覚的な説得力を出すための「3連パラメーター」データを結果毎に追加
 const data = [
-  { id: 1, level: 1, rank: "N", name: "起動前人間", text: "まだ何もしてないのに疲れている状態。脳のメインシステムが立ち上がる前に1日の稼働限界を迎える、究極の省エネ生命体。", bars: [25, 10, 85] },
-  { id: 5, level: 5, rank: "N", name: "軽休憩民", text: "「5分だけ休む」の5分が本編。本業と休憩の主客転倒が深刻化しており、作業を再開するためのエネルギーを休憩で消費する矛盾を抱える。", bars: [45, 55, 60] },
+  { id: 1, level: 1, rank: "N", name: "起動前人間", text: "まだ何もしてないのに疲れている状態。脳のメインシステムが立ち上がる前に1日の限界を迎える、究極の省エネモード生命体。", bars: [25, 10, 85] },
+  { id: 5, level: 5, rank: "N", name: "軽休憩民", text: "「5分だけ休む」の5分が本編。本業と休憩の主客転倒が深刻化しており、作業を再開するためのエネルギーを休憩で消費するタイプ。", bars: [45, 55, 60] },
   { id: 10, level: 10, rank: "R", name: "スマホ吸引体", text: "強力な磁場に引かれるように、無意識下で右手がスマホをホールドする特異体質。スクリーンタイムは驚異の2桁へ突入寸前。", bars: [98, 40, 50] },
   { id: 20, level: 20, rank: "R", name: "動画中毒者", text: "「あと1本」という甘美な嘘を自分に吐き続ける無限ループの囚人。縦型ショート動画のアルゴリズムに完全に脳をハックされている。", bars: [92, 75, 70] },
-  { id: 50, level: 50, rank: "SR", name: "現実逃避マスター", text: "重要タスクが目の前に迫ると、脳内回路が非常事態を検知。突如として部屋の大掃除や、Wikipediaの深掘りを開始する逃避界のプロフェッショナル。", bars: [65, 99, 85] },
-  { id: 99, level: 99, rank: "SSR", name: "サボり神", text: "高次元へのアセンションを遂げた結果、脳内から「努力」の概念パッチが完全アンインストールされた存在。生きているだけで時空をサボらせる絶対神。", bars: [99, 99, 99] }
+  { id: 50, level: 50, rank: "SR", name: "現実逃避マスター", text: "重要タスクが目の前に迫ると脳が非常事態を検知。突如として部屋の大掃除や、どうでもいい調べ物を開始する逃避界のプロフェッショナル。", bars: [65, 99, 85] },
+  { id: 99, level: 99, rank: "SSR", name: "サボり神", text: "高次元へのアセンションを遂げた結果、脳内から「努力」の概念が完全アンインストールされた存在。生きているだけで時空をサボらせる絶対神。", bars: [99, 99, 99] }
 ];
 
-const loadingMessages = ["> CONNECTING NEURON...", "> ANALYZING GENE...", "> EXTRACTING LOGS...", "> MATCHING EXCUSES..."];
+const loadingMessages = ["データをスキャン中...", "サボり遺伝子を解析中...", "脳内ログを抽出中...", "言い訳を照合中..."];
 let state = "idle";
 let loadingInterval;
 let lastResult = null;
@@ -363,18 +358,20 @@ function startLoading(done) {
 
 function showResult(r) {
   const card = document.getElementById("diagnosticCard");
+  const container = document.body;
   card.className = "card-wrapper rank-" + r.rank;
   
-  // 固有シリアルナンバーの偽装生成（バズ用の唯一無二感演出）
+  // ボタンの色も結果のレア度に応じて変える
+  container.className = `rank-${r.rank}-active`;
+
   const pseudoSerial = "#" + Math.floor(Math.random() * 900000 + 100000);
   document.getElementById("serialNo").textContent = pseudoSerial;
 
   document.getElementById("badge").textContent = "RANK " + r.rank;
-  document.getElementById("level").textContent = r.level;
+  document.getElementById("level").textContent = "Lv " + r.level;
   document.getElementById("nickname").textContent = r.name;
   document.getElementById("text").textContent = r.text;
 
-  // メーターと数値テキストを動的に同期
   document.getElementById("barA").style.width = r.bars[0] + "%";
   document.getElementById("barB").style.width = r.bars[1] + "%";
   document.getElementById("barC").style.width = r.bars[2] + "%";
@@ -383,33 +380,9 @@ function showResult(r) {
   document.getElementById("valC").textContent = r.bars[2] + "%";
 }
 
-function resetUI() {
-  const card = document.getElementById("diagnosticCard");
-  card.className = "card-wrapper rank-N";
-  document.getElementById("serialNo").textContent = "#000000";
-  document.getElementById("badge").textContent = "RANK N";
-  document.getElementById("level").textContent = "--";
-  document.getElementById("nickname").textContent = "SYSTEM STANDBY";
-  document.getElementById("text").textContent = "下部のトリガーボタンを押して、脳内精神ログのスキャンおよびサボり因子の定量的測定を開始してください。";
-  
-  document.getElementById("barA").style.width = "0%";
-  document.getElementById("barB").style.width = "0%";
-  document.getElementById("barC").style.width = "0%";
-  document.getElementById("valA").textContent = "0%";
-  document.getElementById("valB").textContent = "0%";
-  document.getElementById("valC").textContent = "0%";
-}
-
-function resetUIWithURLClear() {
-  resetUI();
-  lastResult = null;
-  const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
-  window.history.pushState({ path: cleanUrl }, '', cleanUrl);
-}
-
 function playFx(result, callback) {
   document.body.classList.add("shake", "flash");
-  setTimeout(() => document.body.classList.remove("shake", "flash"), 500);
+  setTimeout(() => document.body.classList.remove("shake", "flash"), 400);
 
   if (result.rank === "SSR") {
     playSSR(callback);
@@ -434,12 +407,12 @@ function playSSR(callback) {
 
 function saveAsImage() {
   if (!lastResult) {
-    alert("対象データ未検出。診断を実行してください。");
+    alert("診断を実行してください。");
     return;
   }
   const card = document.getElementById("diagnosticCard");
   html2canvas(card, {
-    backgroundColor: "#06060a",
+    backgroundColor: "#0b0b12",
     scale: 2,
     logging: false,
     useCORS: true
@@ -447,22 +420,22 @@ function saveAsImage() {
     const imageData = canvas.toDataURL("image/png");
     const link = document.createElement("a");
     link.href = imageData;
-    link.download = `SABORI_REPORT_LV${lastResult.level}.png`;
+    link.download = `SABORI_LV${lastResult.level}.png`;
     link.click();
   }).catch(err => {
-    alert("画像化エラー。スクリーンショットでの保存を推奨します。");
+    alert("画像生成失敗。スクショを推奨します。");
   });
 }
 
 function shareResult() {
   if (!lastResult) {
-    alert("対象データ未検出。");
+    alert("データがありません。");
     return;
   }
   const shareUrl = window.location.href;
-  const text = `【サボり度測定コア MAX】\n計測結果：${lastResult.name} (Lv ${lastResult.level})\n\n👇脳内精神ログのスキャンを実行する\n${shareUrl}`;
+  const text = `【サボり度診断 MAX】\n結果：${lastResult.name} (Lv ${lastResult.level})\n\n👇ここでサボり度を計測する\n${shareUrl}`;
   navigator.clipboard.writeText(text).then(() => {
-    alert("共有用テキストをクリップボードに格納しました。");
+    alert("URLをコピーしました！");
   });
 }
 </script>
