@@ -1,6 +1,11 @@
 let current = null;
 
 function pickResult() {
+  if (!window.data || !window.data.length) {
+    console.error("data missing");
+    return null;
+  }
+
   const r = Math.random();
 
   let rank = "N";
@@ -9,13 +14,26 @@ function pickResult() {
   else if (r < 0.05) rank = "SR";
   else if (r < 0.20) rank = "R";
 
-  const pool = window.data.filter(d => d.rank === rank);
+  let pool = window.data.filter(d => d.rank === rank);
+
+  if (!pool.length) {
+    pool = window.data.filter(d => d.rank === "N");
+  }
+
+  if (!pool.length) return window.data[0];
 
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
 function run() {
+  console.log("run clicked");
+
   current = pickResult();
+
+  if (!current) {
+    alert("データエラー");
+    return;
+  }
 
   document.getElementById("level").innerText = "Lv " + current.level;
   document.getElementById("nickname").innerText = current.name;
@@ -25,12 +43,9 @@ function run() {
 function copyResult() {
   if (!current) return;
 
-  const text = `【サボり診断】
-Lv ${current.level}
-${current.name}
-${current.text}`;
-
-  navigator.clipboard.writeText(text);
+  navigator.clipboard.writeText(
+    `【サボり診断】\nLv ${current.level}\n${current.name}\n${current.text}`
+  );
 
   alert("コピーしました");
 }
@@ -39,7 +54,6 @@ function shareResult() {
   if (!current) return;
 
   const url = `${location.origin}${location.pathname}?id=${current.id}`;
-
   navigator.clipboard.writeText(url);
 
   alert("シェアURLコピーしました");
