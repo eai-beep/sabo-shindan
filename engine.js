@@ -1,23 +1,43 @@
-window.current = null;
+let current = null;
 
-window.run = function(){
+function getRandomResult(){
 
-  if(!window.data){
-    alert("data.jsが読み込まれてない");
-    return;
+  const isRare = Math.random() < 0.05;
+
+  if(isRare){
+    return rarePool[Math.floor(Math.random() * rarePool.length)];
   }
 
-  const r = data[Math.floor(Math.random() * data.length)];
-  window.current = r;
+  return data[Math.floor(Math.random() * data.length)];
+}
 
-  document.getElementById("level").innerText = "Lv " + r.level;
-  document.getElementById("nickname").innerText = r.name;
-  document.getElementById("text").innerText = r.text;
-};
+function run(){
 
-window.copyResult = function(){
+  document.getElementById("loading").style.display = "block";
+  document.getElementById("main").style.display = "none";
 
-  if(!window.current) return;
+  setTimeout(() => {
+
+    const r = getRandomResult();
+    current = r;
+
+    document.getElementById("level").innerText = "Lv " + r.level;
+    document.getElementById("nickname").innerText = r.name;
+    document.getElementById("text").innerText = r.text;
+
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("main").style.display = "flex";
+
+    if(r.level >= 777){
+      alert("✨ RARE RESULT ✨");
+    }
+
+  }, 800);
+}
+
+function copyResult(){
+
+  if(!current) return;
 
   navigator.clipboard.writeText(
 `Lv.${current.level}
@@ -26,25 +46,14 @@ ${current.text}`
   );
 
   alert("コピーしました");
-};
+}
 
-window.shareResult = function(){
+function shareResult(){
 
-  if(!window.current) return;
+  if(!current) return;
 
   const url = `${location.origin}${location.pathname}?id=${current.id}`;
 
-  const text =
-`【サボり診断】
-Lv.${current.level}
-${current.name}
-${current.text}
-
-${url}`;
-
-  if(navigator.share){
-    navigator.share({ text });
-  } else {
-    navigator.clipboard.writeText(text);
-  }
-};
+  navigator.clipboard.writeText(url);
+  alert("リンクコピーしました");
+}
