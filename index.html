@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>サボり診断 MAX</title>
 
+<!-- html2canvas（無料） -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 <style>
 body {
   margin: 0;
@@ -20,7 +23,10 @@ body {
   text-align: center;
 }
 
-.title { font-size: 20px; margin-bottom: 20px; }
+.title {
+  font-size: 20px;
+  margin-bottom: 20px;
+}
 
 .level { font-size: 28px; margin: 10px 0; }
 .nickname { font-size: 22px; margin: 10px 0; }
@@ -47,12 +53,11 @@ button {
   color: white;
 }
 </style>
-
 </head>
 
 <body>
 
-<div class="container">
+<div class="container" id="card">
 
   <div class="title">サボり診断 MAX</div>
 
@@ -64,8 +69,6 @@ button {
   <button class="secondary" onclick="shareImage()">画像でシェア</button>
 
 </div>
-
-<canvas id="canvas" width="1080" height="1080" style="display:none;"></canvas>
 
 <script>
 const data = [
@@ -83,82 +86,33 @@ let lastResult = null;
    診断
 ===================== */
 function run() {
-  const result = data[Math.floor(Math.random() * data.length)];
-  lastResult = result;
+  const r = data[Math.floor(Math.random() * data.length)];
+  lastResult = r;
 
-  document.getElementById("level").textContent = "Lv " + result.level;
-  document.getElementById("nickname").textContent = result.name;
-  document.getElementById("text").textContent = result.text;
+  document.getElementById("level").textContent = "Lv " + r.level;
+  document.getElementById("nickname").textContent = r.name;
+  document.getElementById("text").textContent = r.text;
 }
 
 /* =====================
-   画像生成シェア
+   画像シェア（ここが本体）
 ===================== */
 function shareImage() {
-  if (!lastResult) {
-    alert("まだ診断してない");
-    return;
-  }
+  const target = document.getElementById("card");
 
-  const canvas = document.getElementById("canvas");
-  const ctx = canvas.getContext("2d");
+  html2canvas(target, {
+    backgroundColor: "#111",
+    scale: 2
+  }).then(canvas => {
 
-  // 背景
-  ctx.fillStyle = "#111";
-  ctx.fillRect(0, 0, 1080, 1080);
+    const url = canvas.toDataURL("image/png");
 
-  // タイトル
-  ctx.fillStyle = "#fff";
-  ctx.font = "60px sans-serif";
-  ctx.fillText("サボり診断 MAX", 80, 120);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sabori_diagnosis.png";
+    a.click();
 
-  // レベル
-  ctx.font = "90px sans-serif";
-  ctx.fillText("Lv " + lastResult.level, 80, 300);
-
-  // 名前
-  ctx.font = "80px sans-serif";
-  ctx.fillText(lastResult.name, 80, 450);
-
-  // テキスト
-  ctx.font = "40px sans-serif";
-  wrapText(ctx, lastResult.text, 80, 600, 900, 50);
-
-  // レア表示
-  ctx.font = "50px sans-serif";
-  ctx.fillStyle = "gold";
-  ctx.fillText(lastResult.rank, 80, 900);
-
-  // ダウンロード
-  const url = canvas.toDataURL("image/png");
-
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "sabori.png";
-  a.click();
-}
-
-/* =====================
-   折り返しテキスト
-===================== */
-function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
-  const words = text.split("");
-  let line = "";
-
-  for (let n = 0; n < words.length; n++) {
-    const testLine = line + words[n];
-    const metrics = ctx.measureText(testLine);
-    const testWidth = metrics.width;
-
-    if (testWidth > maxWidth && n > 0) {
-      ctx.fillText(line, x, y);
-      line = words[n];
-      y += lineHeight;
-    } else {
-      line = testLine;
-    }
-  }
-  ctx.fillText(line, x, y);
+  });
 }
 </script>
 
