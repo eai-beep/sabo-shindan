@@ -1,10 +1,8 @@
 window.data = [
-  {"id": 1, "level": 1, "name": "授業中チラ見族", "text": "授業中にこっそりスマホ。先生の声は子守唄になった。"},
-  {"id": 2, "level": 2, "name": "参考書ジャケ買い", "text": "参考書を買って満足、ページを開いたのは購入時だけ。"},
-  {"id": 3, "level": 3, "name": "掃除逃避民", "text": "テスト前だけ突然部屋が綺麗になる、勉強時間と反比例の法則。"}
-];
-
-window.rarePool = [
-  { id: 9001, level: 777, name: "SSR サボり神", text: "努力という概念を忘れた存在" },
-  { id: 9002, level: 888, name: "時間バグ体", text: "1日が通常の半分で消える" }
+  { id: 1, level: 1, rank: "N", name: "起動前人間", text: "まだ何もしてないのに疲れてる" },
+  { id: 2, level: 5, rank: "N", name: "軽休憩民", text: "休憩がメインになってる" },
+  { id: 3, level: 10, rank: "R", name: "スマホ吸引体", text: "気づいたらスマホを開いている" },
+  { id: 4, level: 20, rank: "R", name: "動画中毒者", text: "1本のつもりが止まらない" },
+  { id: 5, level: 50, rank: "SR", name: "現実逃避マスター", text: "テスト3日前なのに掃除が進行中" },
+  { id: 6, level: 99, rank: "SSR", name: "サボり神", text: "努力という概念が未実装" }
 ];
