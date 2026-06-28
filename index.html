@@ -8,7 +8,7 @@
 <style>
 body {
   margin: 0;
-  font-family: "Arial Black", "Noto Sans JP", sans-serif;
+  font-family: Arial, sans-serif;
   background: #0f0f0f;
   color: white;
   display: flex;
@@ -18,20 +18,14 @@ body {
 }
 
 .container {
-  width: 390px;
+  width: 100%;
+  max-width: 420px;
   height: 100dvh;
-  background: #111;
-  padding: 24px;
-  box-sizing: border-box;
-
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-}
-
-.title {
-  text-align: center;
-  opacity: 0.7;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 .center {
@@ -43,37 +37,37 @@ body {
 }
 
 .level {
-  font-size: 64px;
+  font-size: 60px;
   color: #ff4d4d;
-  font-weight: 900;
+  font-weight: bold;
 }
 
 .nickname {
-  font-size: 40px;
+  font-size: 28px;
   margin-top: 10px;
 }
 
 .text {
   margin-top: 20px;
-  font-size: 18px;
-  line-height: 1.6;
-}
-
-.buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  font-size: 16px;
+  opacity: 0.9;
 }
 
 button {
   padding: 14px;
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
+  margin-top: 10px;
   font-weight: bold;
 }
 
 .primary { background: #ff4d4d; color: white; }
 .secondary { background: #2a2a2a; color: white; }
+
+#loading {
+  display: none;
+  text-align: center;
+}
 </style>
 </head>
 
@@ -81,15 +75,17 @@ button {
 
 <div class="container">
 
-  <div class="title">サボり診断メーカー</div>
+  <div id="loading">
+    診断中...
+  </div>
 
-  <div class="center">
+  <div class="center" id="main">
     <div class="level" id="level">Lv --</div>
     <div class="nickname" id="nickname">---</div>
     <div class="text" id="text">ボタンを押してね</div>
   </div>
 
-  <div class="buttons">
+  <div>
     <button class="primary" onclick="run()">診断する</button>
     <button class="secondary" onclick="copyResult()">コピー</button>
     <button class="secondary" onclick="shareResult()">シェア</button>
