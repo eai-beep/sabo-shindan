@@ -89,3 +89,38 @@ button {
   50% { opacity: 1; }
   100% { opacity: 0.2; }
 }
+
+/* ■演出系 */
+
+@keyframes flash {
+  0% { background: #111; }
+  50% { background: #fff; }
+  100% { background: #111; }
+}
+
+@keyframes shake {
+  0% { transform: translate(0,0); }
+  25% { transform: translate(2px,-2px); }
+  50% { transform: translate(-2px,2px); }
+  75% { transform: translate(2px,2px); }
+  100% { transform: translate(0,0); }
+}
+
+@keyframes zoom {
+  0% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+@keyframes gold {
+  0% { box-shadow: 0 0 0px gold; }
+  50% { box-shadow: 0 0 30px gold; }
+  100% { box-shadow: 0 0 0px gold; }
+}
+
+.flash { animation: flash 0.2s 2; }
+.shake { animation: shake 0.3s; }
+.zoom { animation: zoom 0.25s; }
+.gold {
+  animation: gold 1s 2;
+  border: 2px solid gold;
+}
