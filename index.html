@@ -11,89 +11,86 @@
 <style>
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: #0b0b12;
-  /* 背景をダークディストピアから、少し遊び心のあるデジタルドット背景へ */
-  background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
   background-size: 16px 16px;
   color: #fff;
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  padding: 16px;
+  padding: 12px; /* 縦幅削減のため少し狭く */
   box-sizing: border-box;
 }
 
 .container {
   width: 100%;
-  max-width: 400px;
+  max-width: 380px; /* 横幅を少しシャープにして縦伸びを防ぐ */
 }
 
-/* 📱 アプリ全体の最上部タイトル */
+/* アプリタイトル */
 .app-main-title {
   text-align: center;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: bold;
   letter-spacing: 2px;
-  color: #6a6a8a;
-  margin-bottom: 16px;
-  text-transform: uppercase;
+  color: #5a5a7a;
+  margin-bottom: 10px;
 }
 
-/* 🎴 カードデザイン：ソシャゲのレア確定リザルト画面風に昇華 */
+/* 🎴 カード：全体的にパディングを削ってコンパクト化 */
 .card-wrapper {
   background: #131322;
   border: 2px solid #23233b;
-  border-radius: 20px;
-  padding: 28px 24px;
+  border-radius: 16px;
+  padding: 16px 20px; /* 上下左右をスリムに */
   box-sizing: border-box;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.6);
   position: relative;
   overflow: hidden;
-  margin-bottom: 20px;
+  margin-bottom: 12px; /* 下の余白を縮小 */
 }
 
-/* ランク別：枠線と全体の輝きをよりビビッド（鮮やか）に */
+/* ランク別カラー */
 .card-wrapper.rank-N { border-color: #4a4a6a; }
-.card-wrapper.rank-R { border-color: #00d2ff; box-shadow: 0 0 20px rgba(0,210,255,0.3); }
-.card-wrapper.rank-SR { border-color: #ff007b; box-shadow: 0 0 25px rgba(255,0,123,0.4); }
+.card-wrapper.rank-R { border-color: #00d2ff; box-shadow: 0 0 15px rgba(0,210,255,0.2); }
+.card-wrapper.rank-SR { border-color: #ff007b; box-shadow: 0 0 20px rgba(255,0,123,0.25); }
 .card-wrapper.rank-SSR { 
   border-color: #ffb700; 
   background: linear-gradient(135deg, #131322 0%, #2b200a 100%);
-  box-shadow: 0 0 35px rgba(255,183,0,0.5);
+  box-shadow: 0 0 25px rgba(255,183,0,0.3);
 }
 
-/* 💡 カード内ヘッダー：「サボり度診断」を明記！ */
+/* カードヘッダー */
 .card-header-title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 800;
-  letter-spacing: 1px;
   color: #fff;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 2px solid rgba(255,255,255,0.08);
-  padding-bottom: 12px;
-  margin-bottom: 20px;
+  border-bottom: 2px solid rgba(255,255,255,0.06);
+  padding-bottom: 8px;
+  margin-bottom: 12px;
 }
 .card-header-title span { font-size: 11px; color: #5a5a7a; font-weight: normal; }
 
-/* メイン表示エリア */
+/* メイン表示（レベルとバッジ） */
 .main-display {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
 }
 
 .rank-badge {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 900;
-  padding: 6px 14px;
+  padding: 4px 10px;
   background: #23233b;
   color: #a0a0c0;
-  border-radius: 8px;
+  border-radius: 6px;
 }
 .rank-R .rank-badge { background: #00d2ff; color: #000; }
 .rank-SR .rank-badge { background: #ff007b; color: #fff; }
@@ -101,61 +98,58 @@ body {
 
 @keyframes bounce {
   0% { transform: translateY(0); }
-  100% { transform: translateY(-4px); }
+  100% { transform: translateY(-3px); }
 }
 
-/* レベル数字のインパクト化 */
-.level-zone {
-  line-height: 1;
-}
+/* 縮小：レベル文字を 72px → 52px にダイエット */
+.level-zone { line-height: 1; }
 .level-num {
-  font-size: 72px;
+  font-size: 52px;
   font-weight: 900;
   font-family: 'Impact', 'Arial Black', sans-serif;
-  letter-spacing: -1px;
-  color: #fff;
+  color: #4a4a6a; /* 未実行時はグレー */
 }
+.rank-N .level-num { color: #fff; }
 .rank-R .level-num { color: #00d2ff; }
 .rank-SR .level-num { color: #ff007b; }
-.rank-SSR .level-num { color: #ffb700; text-shadow: 0 0 15px rgba(255,183,0,0.5); }
+.rank-SSR .level-num { color: #ffb700; text-shadow: 0 0 15px rgba(255,183,0,0.4); }
 
-/* キャラ名・二つ名 */
+/* 二つ名 */
 .nickname {
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 900;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   color: #fff;
 }
 .rank-SSR .nickname { color: #ffb700; }
 
-/* 3連ステータスメーター（ポップで見やすい色合いに調整） */
+/* メーター領域もコンパクトに */
 .status-monitor {
-  background: rgba(0,0,0,0.25);
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 20px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
 }
-.status-row { margin-bottom: 12px; }
+.status-row { margin-bottom: 8px; }
 .status-row:last-child { margin-bottom: 0; }
 .status-meta {
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
-  color: #9a9ab5;
-  margin-bottom: 6px;
-  font-weight: bold;
+  font-size: 11px;
+  color: #8a8ab5;
+  margin-bottom: 4px;
 }
 .status-bar-bg {
-  height: 8px;
+  height: 6px;
   background: #1a1a2e;
-  border-radius: 4px;
+  border-radius: 3px;
   overflow: hidden;
 }
 .status-bar-fill {
   height: 100%;
-  width: 0%;
-  background: #5a5a7a;
-  border-radius: 4px;
+  width: 0%; /* 初期値はJSおよびHTML側で0%に固定 */
+  background: #3a3a5a;
+  border-radius: 3px;
   transition: width 0.6s cubic-bezier(0.1, 1, 0.1, 1);
 }
 .rank-R .status-bar-fill { background: #00d2ff; }
@@ -164,47 +158,55 @@ body {
 
 /* 解説テキスト */
 .analysis-text {
-  font-size: 14px;
-  line-height: 1.6;
-  color: #c5c5d5;
-  text-align: left;
-  background: rgba(255,255,255,0.03);
-  padding: 14px;
-  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #a5a5b5;
+  background: rgba(255,255,255,0.02);
+  padding: 10px 12px;
+  border-radius: 8px;
 }
 
-/* ボタンUI（押しやすくて今風のフラットデザイン） */
+/* 🕹️ ボタン配置の大手術：シェアと保存を横並びにして縦幅カット！ */
 button {
   width: 100%;
-  padding: 16px;
-  margin-top: 12px;
+  padding: 14px;
   border: none;
-  border-radius: 12px;
-  font-size: 16px;
+  border-radius: 10px;
+  font-size: 15px;
   font-weight: bold;
   cursor: pointer;
+  box-sizing: border-box;
   transition: all 0.1s ease;
 }
-button:active { transform: scale(0.97); }
+button:active { transform: scale(0.98); }
 
 .btn-main {
   background: linear-gradient(135deg, #00d2ff, #0088ff);
   color: #fff;
-  box-shadow: 0 4px 15px rgba(0,136,255,0.3);
+  box-shadow: 0 4px 12px rgba(0,136,255,0.25);
+  margin-bottom: 8px;
 }
-.rank-SR-active .btn-main { background: linear-gradient(135deg, #ff007b, #9900ff); box-shadow: 0 4px 15px rgba(255,0,123,0.3); }
-.rank-SSR-active .btn-main { background: linear-gradient(135deg, #ffb700, #ff5500); box-shadow: 0 4px 15px rgba(255,183,0,0.3); }
+.rank-SR-active .btn-main { background: linear-gradient(135deg, #ff007b, #9900ff); box-shadow: 0 4px 12px rgba(255,0,123,0.25); }
+.rank-SSR-active .btn-main { background: linear-gradient(135deg, #ffb700, #ff5500); box-shadow: 0 4px 12px rgba(255,183,0,0.25); }
 
+/* 横並びボタン用のコンテナ */
+.btn-group {
+  display: flex;
+  gap: 8px;
+}
 .btn-save {
   background: #23233b;
   color: #fff;
   border: 1px solid #33335c;
-}
-.btn-sub {
-  background: transparent;
-  color: #6a6a8a;
   font-size: 13px;
-  padding: 6px;
+  padding: 12px;
+}
+.btn-share {
+  background: #fff;
+  color: #000;
+  font-size: 13px;
+  padding: 12px;
+  box-shadow: 0 4px 10px rgba(255,255,255,0.1);
 }
 
 /* 演出レイヤー */
@@ -218,30 +220,28 @@ button:active { transform: scale(0.97); }
   z-index: 100;
 }
 #loading.active, #ssrOverlay.active { display: flex; }
-#loadingText { font-size: 18px; font-weight: bold; color: #00d2ff; letter-spacing: 1px; }
-
-#ssrOverlay { font-size: 36px; font-weight: 900; color: #ffb700; text-shadow: 0 0 20px #ffb700; z-index: 200; opacity: 0; transition: opacity 0.2s; }
+#loadingText { font-size: 16px; font-weight: bold; color: #00d2ff; }
+#ssrOverlay { font-size: 32px; font-weight: 900; color: #ffb700; text-shadow: 0 0 20px #ffb700; z-index: 200; opacity: 0; transition: opacity 0.2s; }
 #ssrOverlay.show { opacity: 1; }
 
-/* 振動・フラッシュ */
 .shake { animation: light-shake 0.3s ease; }
 .flash { animation: screen-flash 0.3s ease-out; }
 @keyframes light-shake {
   0%, 100% { transform: translate(0,0); }
-  20%, 60% { transform: translate(-4px, 2px); }
-  40%, 80% { transform: translate(4px, -2px); }
+  20%, 60% { transform: translate(-3px, 1px); }
+  40%, 80% { transform: translate(3px, -1px); }
 }
 @keyframes screen-flash {
-  0% { background: #ffffff; opacity: 0.3; }
+  0% { background: #ffffff; opacity: 0.2; }
   100% { background: #0b0b12; opacity: 1; }
 }
 </style>
 </head>
 
-<body>
+<body class="rank-ready">
 
 <div id="loading">
-  <div id="loadingText">診断データを生成中...</div>
+  <div id="loadingText">サボり遺伝子をスキャン中...</div>
 </div>
 
 <div id="ssrOverlay">✨ SSR神確定 ✨</div>
@@ -250,7 +250,7 @@ button:active { transform: scale(0.97); }
 
   <div class="app-main-title">SABORI CHECKER</div>
 
-  <!-- 📸 このカード画像の中に「サボり度診断」をハッキリ入れました！ -->
+  <!-- 📸 初期状態を完全に「未実行状態」にリセットしました -->
   <div class="card-wrapper rank-N" id="diagnosticCard">
     
     <div class="card-header-title">
@@ -259,7 +259,7 @@ button:active { transform: scale(0.97); }
     </div>
     
     <div class="main-display">
-      <div class="rank-badge" id="badge">RANK N</div>
+      <div class="rank-badge" id="badge">RANK --</div>
       <div class="level-zone">
         <span class="level-num" id="level">--</span>
       </div>
@@ -270,25 +270,28 @@ button:active { transform: scale(0.97); }
     <div class="status-monitor">
       <div class="status-row">
         <div class="status-meta"><span>スマホ依存度</span><span id="valA">0%</span></div>
-        <div class="status-bar-bg"><div class="status-bar-fill" id="barA"></div></div>
+        <div class="status-bar-bg"><div class="status-bar-fill" id="barA" style="width: 0%;"></div></div>
       </div>
       <div class="status-row">
         <div class="status-meta"><span>現実逃避癖</span><span id="valB">0%</span></div>
-        <div class="status-bar-bg"><div class="status-bar-fill" id="barB"></div></div>
+        <div class="status-bar-bg"><div class="status-bar-fill" id="barB" style="width: 0%;"></div></div>
       </div>
       <div class="status-row">
         <div class="status-meta"><span>労働拒否指数</span><span id="valC">0%</span></div>
-        <div class="status-bar-bg"><div class="status-bar-fill" id="barC"></div></div>
+        <div class="status-bar-bg"><div class="status-bar-fill" id="barC" style="width: 0%;"></div></div>
       </div>
     </div>
 
-    <div class="analysis-text" id="text">ボタンを押してあなたの脳内サボり因子を測定してください。</div>
+    <div class="analysis-text" id="text">「診断する」ボタンを押して、あなたの脳内サボり度を定量計測してください。</div>
   </div>
 
-  <!-- 操作ボタン -->
+  <!-- 🕹️ 操作ボタン：綺麗に1画面に収まる構造に変更 -->
   <button class="btn-main" id="mainBtn" onclick="run()">診断する</button>
-  <button class="btn-save" onclick="saveAsImage()">結果を画像として保存</button>
-  <button class="btn-sub" onclick="shareResult()">結果URLをコピーしてシェア</button>
+  
+  <div class="btn-group">
+    <button class="btn-save" onclick="saveAsImage()">画像として保存</button>
+    <button class="btn-share" onclick="shareResult()">結果をシェア</button>
+  </div>
 
 </div>
 
@@ -302,7 +305,7 @@ const data = [
   { id: 99, level: 99, rank: "SSR", name: "サボり神", text: "高次元へのアセンションを遂げた結果、脳内から「努力」の概念が完全アンインストールされた存在。生きているだけで時空をサボらせる絶対神。", bars: [99, 99, 99] }
 ];
 
-const loadingMessages = ["データをスキャン中...", "サボり遺伝子を解析中...", "脳内ログを抽出中...", "言い訳を照合中..."];
+const loadingMessages = ["スキャン中...", "解析中...", "ログ抽出中...", "照合中..."];
 let state = "idle";
 let loadingInterval;
 let lastResult = null;
@@ -327,6 +330,7 @@ function run() {
     const result = data[Math.floor(Math.random() * data.length)];
     lastResult = result;
 
+    // URLを書き換える
     const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + `?id=${result.id}`;
     window.history.pushState({ path: newUrl }, '', newUrl);
 
@@ -353,7 +357,7 @@ function startLoading(done) {
     clearInterval(loadingInterval);
     loading.classList.remove("active");
     done();
-  }, 1200);
+  }, 1000);
 }
 
 function showResult(r) {
@@ -361,7 +365,6 @@ function showResult(r) {
   const container = document.body;
   card.className = "card-wrapper rank-" + r.rank;
   
-  // ボタンの色も結果のレア度に応じて変える
   container.className = `rank-${r.rank}-active`;
 
   const pseudoSerial = "#" + Math.floor(Math.random() * 900000 + 100000);
@@ -402,7 +405,7 @@ function playSSR(callback) {
       overlay.classList.remove("active");
       callback();
     }, 200);
-  }, 1200);
+  }, 1000);
 }
 
 function saveAsImage() {
@@ -435,7 +438,7 @@ function shareResult() {
   const shareUrl = window.location.href;
   const text = `【サボり度診断 MAX】\n結果：${lastResult.name} (Lv ${lastResult.level})\n\n👇ここでサボり度を計測する\n${shareUrl}`;
   navigator.clipboard.writeText(text).then(() => {
-    alert("URLをコピーしました！");
+    alert("URLコピー完了！SNSに貼り付けてね！");
   });
 }
 </script>
