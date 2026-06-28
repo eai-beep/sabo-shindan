@@ -5,13 +5,20 @@ function getRandomResult(){
   const isRare = Math.random() < 0.05;
 
   if(isRare){
-    return rarePool[Math.floor(Math.random() * rarePool.length)];
+    const pool = window.rarePool || [];
+    return pool[Math.floor(Math.random() * pool.length)];
   }
 
-  return data[Math.floor(Math.random() * data.length)];
+  const pool = window.data || [];
+  return pool[Math.floor(Math.random() * pool.length)];
 }
 
-function run(){
+window.run = function(){
+
+  if(!window.data){
+    alert("data.jsが読み込まれていない");
+    return;
+  }
 
   document.getElementById("loading").style.display = "block";
   document.getElementById("main").style.display = "none";
@@ -33,9 +40,9 @@ function run(){
     }
 
   }, 800);
-}
+};
 
-function copyResult(){
+window.copyResult = function(){
 
   if(!current) return;
 
@@ -46,9 +53,9 @@ ${current.text}`
   );
 
   alert("コピーしました");
-}
+};
 
-function shareResult(){
+window.shareResult = function(){
 
   if(!current) return;
 
@@ -56,4 +63,4 @@ function shareResult(){
 
   navigator.clipboard.writeText(url);
   alert("リンクコピーしました");
-}
+};
