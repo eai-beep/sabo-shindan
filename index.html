@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>サボり診断 MAX</title>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
 <style>
 body {
   margin: 0;
@@ -22,7 +20,11 @@ body {
   text-align: center;
 }
 
-.title { font-size: 20px; margin-bottom: 20px; }
+.title {
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
 .level { font-size: 28px; margin: 10px 0; }
 .nickname { font-size: 22px; margin: 10px 0; }
 .text { margin: 10px 0; opacity: 0.8; }
@@ -47,12 +49,68 @@ button {
   background: #333;
   color: white;
 }
+
+#loading {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  z-index: 100;
+}
+
+#ssrOverlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  background: rgba(0,0,0,0.85);
+  color: gold;
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 200;
+}
+
+#ssrOverlay.active,
+#loading.active {
+  display: flex;
+}
+
+#ssrOverlay.show { opacity: 1; }
+
+/* effects */
+.shake { animation: shake 0.4s ease; }
+.flash { animation: flash 0.6s ease; }
+
+@keyframes shake {
+  0% { transform: translate(0,0); }
+  25% { transform: translate(-5px,3px); }
+  50% { transform: translate(5px,-3px); }
+  100% { transform: translate(0,0); }
+}
+
+@keyframes flash {
+  0% { background:#000; }
+  40% { background:#fff; }
+  100% { background:#111; }
+}
 </style>
+
 </head>
 
 <body>
 
-<div class="container" id="card">
+<div id="loading">
+  <div id="loadingText"></div>
+</div>
+
+<div id="ssrOverlay">？？？</div>
+
+<div class="container">
 
   <div class="title">サボり診断 MAX</div>
 
@@ -61,95 +119,178 @@ button {
   <div class="text" id="text">ボタンを押してね</div>
 
   <button class="primary" onclick="run()">診断する</button>
-  <button class="secondary" onclick="share()">シェア（URL＋画像）</button>
+  <button class="secondary" onclick="shareResult()">結果をシェアURLでコピー</button>
+  <button class="secondary" onclick="resetUIWithURLClear()">リセット</button>
 
 </div>
 
 <script>
+// 将来の300件拡張を見据え、一意のID（文字列等でも可）を定義
 const data = [
-  { level: 1, rank: "N", name: "起動前人間", text: "まだ何もしてないのに疲れてる" },
-  { level: 5, rank: "N", name: "軽休憩民", text: "休憩がメインになってる" },
-  { level: 10, rank: "R", name: "スマホ吸引体", text: "気づいたらスマホを開いている" },
-  { level: 20, rank: "R", name: "動画中毒者", text: "1本のつもりが止まらない" },
-  { level: 50, rank: "SR", name: "現実逃避マスター", text: "気づいたら別のことしてる" },
-  { level: 99, rank: "SSR", name: "サボり神", text: "努力という概念が未実装" }
+  { id: 1, level: 1, rank: "N", name: "起動前人間", text: "まだ何もしてないのに疲れてる" },
+  { id: 5, level: 5, rank: "N", name: "軽休憩民", text: "休憩がメインになってる" },
+  { id: 10, level: 10, rank: "R", name: "スマホ吸引体", text: "気づいたらスマホを開いている" },
+  { id: 20, level: 20, rank: "R", name: "動画中毒者", text: "1本のつもりが止まらない" },
+  { id: 50, level: 50, rank: "SR", name: "現実逃避マスター", text: "気づいたら別のことしてる" },
+  { id: 99, level: 99, rank: "SSR", name: "サボり神", text: "努力という概念が未実装" }
 ];
 
+const loadingMessages = [
+  "解析中...",
+  "診断中...",
+  "未来計算中...",
+  "サボり度測定中..."
+];
+
+let state = "idle";
+let loadingInterval;
 let lastResult = null;
 
-/* =====================
-   URL復元
-===================== */
-function loadFromURL() {
-  const params = new URLSearchParams(location.search);
-  const r = params.get("result");
+// ■ 拡張機能: ページ読み込み時にURLパラメータをチェックして復元
+window.addEventListener("DOMContentLoaded", () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const sharedId = urlParams.get("id");
 
-  if (r) {
-    const found = data.find(d => d.level == r);
-    if (found) {
-      show(found);
-      lastResult = found;
+  if (sharedId) {
+    // パラメータのIDに一致するデータを検索
+    const sharedData = data.find(item => item.id == sharedId);
+    if (sharedData) {
+      lastResult = sharedData;
+      showResult(sharedData); // 共有時は演出なしで即表示（UX快適化）
     }
   }
-}
+});
 
-/* =====================
-   診断
-===================== */
 function run() {
-  const r = data[Math.floor(Math.random() * data.length)];
-  lastResult = r;
-  show(r);
+  if (state !== "idle") return;
+
+  state = "loading";
+  resetUI();
+
+  startLoading(() => {
+    const result = data[Math.floor(Math.random() * data.length)];
+    lastResult = result;
+
+    // ブラウザのURLバーを、診断されたIDのURLにこっそり書き換える（ページはリロードされない）
+    const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + `?id=${result.id}`;
+    window.history.pushState({ path: newUrl }, '', newUrl);
+
+    playFx(result, () => {
+      showResult(result);
+      state = "idle";
+    });
+  });
 }
 
-/* =====================
-   表示
-===================== */
-function show(r) {
+function startLoading(done) {
+  const loading = document.getElementById("loading");
+  const text = document.getElementById("loadingText");
+
+  loading.classList.add("active");
+
+  let i = 0;
+  text.textContent = loadingMessages[0];
+
+  loadingInterval = setInterval(() => {
+    i++;
+    text.textContent = loadingMessages[i % loadingMessages.length];
+  }, 120);
+
+  setTimeout(() => {
+    clearInterval(loadingInterval);
+    loading.classList.remove("active");
+    done();
+  }, 1200);
+}
+
+function showResult(r) {
   document.getElementById("level").textContent = "Lv " + r.level;
   document.getElementById("nickname").textContent = r.name;
   document.getElementById("text").textContent = r.text;
 }
 
-/* =====================
-   シェア（URL＋画像）
-===================== */
-function share() {
+function resetUI() {
+  document.getElementById("level").textContent = "Lv --";
+  document.getElementById("nickname").textContent = "---";
+  document.getElementById("text").textContent = "ボタンを押してね";
+}
+
+// リセット時はURLのパラメータも綺麗に消す設計
+function resetUIWithURLClear() {
+  resetUI();
+  lastResult = null;
+  const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+  window.history.pushState({ path: cleanUrl }, '', cleanUrl);
+}
+
+function playFx(result, callback) {
+  playShake();
+  playFlash();
+
+  if (result.rank === "SSR") {
+    playSSR(callback);
+  } else {
+    callback();
+  }
+}
+
+function playShake() {
+  document.body.classList.add("shake");
+  setTimeout(() => document.body.classList.remove("shake"), 400);
+}
+
+function playFlash() {
+  document.body.classList.add("flash");
+  setTimeout(() => document.body.classList.remove("flash"), 600);
+}
+
+function playSSR(callback) {
+  const overlay = document.getElementById("ssrOverlay");
+
+  overlay.classList.add("active");
+  setTimeout(() => overlay.classList.add("show"), 10);
+
+  setTimeout(() => {
+    overlay.textContent = "✨ SSR確定 ✨";
+  }, 500);
+
+  setTimeout(() => {
+    overlay.classList.remove("show");
+
+    setTimeout(() => {
+      overlay.classList.remove("active");
+      overlay.textContent = "？？？";
+      callback();
+    }, 200);
+  }, 1200);
+}
+
+/* ■ シェア機能（URL復元対応版） */
+function shareResult() {
   if (!lastResult) {
-    alert("まだ診断してない");
+    alert("まだ診断してないよ！");
     return;
   }
 
-  // URL生成
-  const url = `${location.origin}${location.pathname}?result=${lastResult.level}`;
+  // 現在のURL（?id=xx 付き）を取得
+  const shareUrl = window.location.href;
 
-  // URLコピー
-  navigator.clipboard.writeText(url);
+  const text =
+`【サボり診断 MAX】
+結果：${lastResult.name} (Lv ${lastResult.level})
+「${lastResult.text}」
 
-  // 画像生成
-  const target = document.getElementById("card");
+👇あなたのサボり度を測定する
+${shareUrl}`;
 
-  html2canvas(target, {
-    backgroundColor: "#111",
-    scale: 2
-  }).then(canvas => {
-
-    const img = canvas.toDataURL("image/png");
-
-    const a = document.createElement("a");
-    a.href = img;
-    a.download = "sabori.png";
-    a.click();
-
-    alert("URLコピー＋画像保存 完了");
-
-  });
+  navigator.clipboard.writeText(text)
+    .then(() => {
+      alert("結果と共有URLをコピーしました！SNSに貼り付けてね！");
+    })
+    .catch(() => {
+      alert("コピーに失敗しました。URLはこちらです：\n" + shareUrl);
+    });
 }
-
-/* =====================
-   起動時復元
-===================== */
-loadFromURL();
 </script>
 
 </body>
