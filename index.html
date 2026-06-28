@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>サボり診断</title>
+<title>サボり診断 MAX</title>
 
 <style>
 body {
@@ -25,20 +25,9 @@ body {
   margin-bottom: 20px;
 }
 
-.level {
-  font-size: 28px;
-  margin: 10px 0;
-}
-
-.nickname {
-  font-size: 22px;
-  margin: 10px 0;
-}
-
-.text {
-  margin: 10px 0;
-  opacity: 0.8;
-}
+.level { font-size: 28px; margin: 10px 0; }
+.nickname { font-size: 22px; margin: 10px 0; }
+.text { margin: 10px 0; opacity: 0.8; }
 
 button {
   width: 100%;
@@ -61,17 +50,16 @@ button {
   color: white;
 }
 
-/* 修正①: IDセレクタに負けないよう !important を付与 */
-.hidden { display: none !important; }
+.hidden { display:none; }
 
 /* loading */
 #loading {
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.85);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   font-size: 18px;
   z-index: 100;
 }
@@ -80,9 +68,9 @@ button {
 #ssrOverlay {
   position: fixed;
   inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   font-size: 48px;
   background: rgba(0,0,0,0.85);
   color: gold;
@@ -91,8 +79,23 @@ button {
   z-index: 200;
 }
 
-#ssrOverlay.show {
-  opacity: 1;
+#ssrOverlay.show { opacity: 1; }
+
+/* effects */
+.shake { animation: shake 0.4s ease; }
+.flash { animation: flash 0.6s ease; }
+
+@keyframes shake {
+  0% { transform: translate(0,0); }
+  25% { transform: translate(-5px,3px); }
+  50% { transform: translate(5px,-3px); }
+  100% { transform: translate(0,0); }
+}
+
+@keyframes flash {
+  0% { background:#000; }
+  40% { background:#fff; }
+  100% { background:#111; }
 }
 </style>
 
@@ -108,13 +111,14 @@ button {
 
 <div class="container">
 
-  <div class="title">サボり診断</div>
+  <div class="title">サボり診断 MAX</div>
 
   <div class="level" id="level">Lv --</div>
   <div class="nickname" id="nickname">---</div>
   <div class="text" id="text">ボタンを押してね</div>
 
   <button class="primary" onclick="run()">診断する</button>
+  <button class="secondary" onclick="shareResult()">シェア</button>
   <button class="secondary" onclick="resetUI()">リセット</button>
 
 </div>
@@ -132,12 +136,13 @@ const data = [
 const loadingMessages = [
   "解析中...",
   "診断中...",
-  "計算中...",
-  "チェック中..."
+  "未来計算中...",
+  "サボり度測定中..."
 ];
 
 let state = "idle";
 let loadingInterval;
+let lastResult = null;
 
 function run() {
   if (state !== "idle") return;
@@ -146,20 +151,13 @@ function run() {
   resetUI();
 
   startLoading(() => {
-    // ランダム選出
     const result = data[Math.floor(Math.random() * data.length)];
+    lastResult = result;
 
-    // 修正②: SSRの時だけカットイン演出を挟む条件分岐
-    if (result.rank === "SSR") {
-      playSSR(result, () => {
-        showResult(result);
-        state = "idle";
-      });
-    } else {
-      // N, R, SR の場合は演出なしで即結果表示
+    playFx(result, () => {
       showResult(result);
       state = "idle";
-    }
+    });
   });
 }
 
@@ -168,20 +166,19 @@ function startLoading(done) {
   const text = document.getElementById("loadingText");
 
   loading.classList.remove("hidden");
-  
+
   let i = 0;
-  text.textContent = loadingMessages[0];
 
   loadingInterval = setInterval(() => {
-    i++;
     text.textContent = loadingMessages[i % loadingMessages.length];
-  }, 150);
+    i++;
+  }, 120);
 
   setTimeout(() => {
     clearInterval(loadingInterval);
     loading.classList.add("hidden");
     done();
-  }, 1200); // 演出体感のために1.2秒固定
+  }, 1200);
 }
 
 function showResult(r) {
@@ -196,28 +193,63 @@ function resetUI() {
   document.getElementById("text").textContent = "ボタンを押してね";
 }
 
-function playSSR(result, callback) {
+function playFx(result, callback) {
+  playShake();
+  playFlash();
+
+  if (result.rank === "SSR") {
+    playSSR(callback);
+  } else {
+    callback();
+  }
+}
+
+function playShake() {
+  document.body.classList.add("shake");
+  setTimeout(() => document.body.classList.remove("shake"), 400);
+}
+
+function playFlash() {
+  document.body.classList.add("flash");
+  setTimeout(() => document.body.classList.remove("flash"), 600);
+}
+
+function playSSR(callback) {
   const overlay = document.getElementById("ssrOverlay");
 
   overlay.classList.remove("hidden");
-  
-  // classListの追加を確実に反映させるための微小タイマー
-  setTimeout(() => {
-    overlay.classList.add("show");
-  }, 10);
+  setTimeout(() => overlay.classList.add("show"), 10);
 
   setTimeout(() => {
     overlay.textContent = "✨ SSR確定 ✨";
-  }, 400);
+  }, 500);
 
   setTimeout(() => {
     overlay.classList.remove("show");
+
     setTimeout(() => {
       overlay.classList.add("hidden");
       overlay.textContent = "？？？";
       callback();
-    }, 200); // フェードアウトの0.2秒を待ってから完全に隠す
-  }, 1400);
+    }, 200);
+  }, 1200);
+}
+
+/* ■ シェア機能 */
+function shareResult() {
+  if (!lastResult) {
+    alert("まだ診断してない");
+    return;
+  }
+
+  const text =
+`【サボり診断】
+Lv ${lastResult.level}
+${lastResult.name}
+${lastResult.text}`;
+
+  navigator.clipboard.writeText(text);
+  alert("結果をコピーした");
 }
 </script>
 
