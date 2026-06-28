@@ -47,6 +47,7 @@ button {
   border: none;
   border-radius: 10px;
   font-size: 16px;
+  cursor: pointer;
 }
 
 .primary {
@@ -60,9 +61,8 @@ button {
   color: white;
 }
 
-.hidden {
-  display: none;
-}
+/* 修正①: IDセレクタに負けないよう !important を付与 */
+.hidden { display: none !important; }
 
 /* loading */
 #loading {
@@ -73,6 +73,7 @@ button {
   align-items: center;
   justify-content: center;
   font-size: 18px;
+  z-index: 100;
 }
 
 /* SSR */
@@ -87,12 +88,14 @@ button {
   color: gold;
   opacity: 0;
   transition: 0.2s;
+  z-index: 200;
 }
 
 #ssrOverlay.show {
   opacity: 1;
 }
 </style>
+
 </head>
 
 <body>
@@ -140,16 +143,23 @@ function run() {
   if (state !== "idle") return;
 
   state = "loading";
-
   resetUI();
 
   startLoading(() => {
+    // ランダム選出
     const result = data[Math.floor(Math.random() * data.length)];
 
-    playSSR(result, () => {
+    // 修正②: SSRの時だけカットイン演出を挟む条件分岐
+    if (result.rank === "SSR") {
+      playSSR(result, () => {
+        showResult(result);
+        state = "idle";
+      });
+    } else {
+      // N, R, SR の場合は演出なしで即結果表示
       showResult(result);
       state = "idle";
-    });
+    }
   });
 }
 
@@ -158,21 +168,20 @@ function startLoading(done) {
   const text = document.getElementById("loadingText");
 
   loading.classList.remove("hidden");
-  text.classList.remove("hidden");
-
+  
   let i = 0;
+  text.textContent = loadingMessages[0];
 
   loadingInterval = setInterval(() => {
-    text.textContent = loadingMessages[i % loadingMessages.length];
     i++;
+    text.textContent = loadingMessages[i % loadingMessages.length];
   }, 150);
 
   setTimeout(() => {
     clearInterval(loadingInterval);
     loading.classList.add("hidden");
-    text.classList.add("hidden");
     done();
-  }, 1000);
+  }, 1200); // 演出体感のために1.2秒固定
 }
 
 function showResult(r) {
@@ -191,18 +200,24 @@ function playSSR(result, callback) {
   const overlay = document.getElementById("ssrOverlay");
 
   overlay.classList.remove("hidden");
-  overlay.classList.add("show");
+  
+  // classListの追加を確実に反映させるための微小タイマー
+  setTimeout(() => {
+    overlay.classList.add("show");
+  }, 10);
 
   setTimeout(() => {
     overlay.textContent = "✨ SSR確定 ✨";
-  }, 600);
+  }, 400);
 
   setTimeout(() => {
     overlay.classList.remove("show");
-    overlay.classList.add("hidden");
-    overlay.textContent = "？？？";
-    callback();
-  }, 1200);
+    setTimeout(() => {
+      overlay.classList.add("hidden");
+      overlay.textContent = "？？？";
+      callback();
+    }, 200); // フェードアウトの0.2秒を待ってから完全に隠す
+  }, 1400);
 }
 </script>
 
