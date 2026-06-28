@@ -11,10 +11,10 @@ body {
   font-family: Arial, sans-serif;
   background: #0f0f0f;
   color: white;
+  height: 100dvh;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100dvh;
 }
 
 .container {
@@ -23,9 +23,13 @@ body {
   height: 100dvh;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   padding: 20px;
   box-sizing: border-box;
+}
+
+.title {
+  text-align: center;
+  opacity: 0.6;
 }
 
 .center {
@@ -37,27 +41,32 @@ body {
 }
 
 .level {
-  font-size: 60px;
+  font-size: 64px;
   color: #ff4d4d;
   font-weight: bold;
 }
 
 .nickname {
-  font-size: 28px;
+  font-size: 30px;
   margin-top: 10px;
 }
 
 .text {
   margin-top: 20px;
   font-size: 16px;
-  opacity: 0.9;
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: auto;
 }
 
 button {
   padding: 14px;
   border: none;
-  border-radius: 10px;
-  margin-top: 10px;
+  border-radius: 12px;
   font-weight: bold;
 }
 
@@ -75,9 +84,9 @@ button {
 
 <div class="container">
 
-  <div id="loading">
-    診断中...
-  </div>
+  <div class="title">サボり診断メーカー</div>
+
+  <div id="loading">診断中...</div>
 
   <div class="center" id="main">
     <div class="level" id="level">Lv --</div>
@@ -85,7 +94,7 @@ button {
     <div class="text" id="text">ボタンを押してね</div>
   </div>
 
-  <div>
+  <div class="buttons">
     <button class="primary" onclick="run()">診断する</button>
     <button class="secondary" onclick="copyResult()">コピー</button>
     <button class="secondary" onclick="shareResult()">シェア</button>
