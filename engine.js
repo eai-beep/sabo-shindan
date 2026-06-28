@@ -1,66 +1,87 @@
-let current = null;
+(() => {
 
-function getRandomResult(){
+  let current = null;
 
-  const isRare = Math.random() < 0.05;
+  function getPool(){
+    // ★ここが重要：存在チェックを毎回やる
+    const data = window.data;
+    const rare = window.rarePool;
 
-  if(isRare){
-    const pool = window.rarePool || [];
-    return pool[Math.floor(Math.random() * pool.length)];
-  }
-
-  const pool = window.data || [];
-  return pool[Math.floor(Math.random() * pool.length)];
-}
-
-window.run = function(){
-
-  if(!window.data){
-    alert("data.jsが読み込まれていない");
-    return;
-  }
-
-  document.getElementById("loading").style.display = "block";
-  document.getElementById("main").style.display = "none";
-
-  setTimeout(() => {
-
-    const r = getRandomResult();
-    current = r;
-
-    document.getElementById("level").innerText = "Lv " + r.level;
-    document.getElementById("nickname").innerText = r.name;
-    document.getElementById("text").innerText = r.text;
-
-    document.getElementById("loading").style.display = "none";
-    document.getElementById("main").style.display = "flex";
-
-    if(r.level >= 777){
-      alert("✨ RARE RESULT ✨");
+    if(!Array.isArray(data)){
+      console.error("data.js not loaded: window.data is", data);
+      return [];
     }
 
-  }, 800);
-};
+    if(!Array.isArray(rare)){
+      console.error("data.js not loaded: window.rarePool is", rare);
+    }
 
-window.copyResult = function(){
+    return { data, rare };
+  }
 
-  if(!current) return;
+  function getRandomResult(){
 
-  navigator.clipboard.writeText(
+    const { data, rare } = getPool();
+
+    if(Math.random() < 0.05 && rare?.length){
+      return rare[Math.floor(Math.random() * rare.length)];
+    }
+
+    return data[Math.floor(Math.random() * data.length)];
+  }
+
+  function run(){
+
+    const loading = document.getElementById("loading");
+    const main = document.getElementById("main");
+
+    if(!window.data){
+      alert("data.jsが読み込まれてない（window.dataなし）");
+      return;
+    }
+
+    loading.style.display = "block";
+    main.style.display = "none";
+
+    setTimeout(() => {
+
+      const r = getRandomResult();
+      current = r;
+
+      document.getElementById("level").innerText = "Lv " + r.level;
+      document.getElementById("nickname").innerText = r.name;
+      document.getElementById("text").innerText = r.text;
+
+      loading.style.display = "none";
+      main.style.display = "flex";
+
+    }, 800);
+  }
+
+  function copyResult(){
+    if(!current) return;
+
+    navigator.clipboard.writeText(
 `Lv.${current.level}
 ${current.name}
 ${current.text}`
-  );
+    );
 
-  alert("コピーしました");
-};
+    alert("コピーしました");
+  }
 
-window.shareResult = function(){
+  function shareResult(){
+    if(!current) return;
 
-  if(!current) return;
+    const url = `${location.origin}${location.pathname}?id=${current.id}`;
+    navigator.clipboard.writeText(url);
 
-  const url = `${location.origin}${location.pathname}?id=${current.id}`;
+    alert("リンクコピーしました");
+  }
 
-  navigator.clipboard.writeText(url);
-  alert("リンクコピーしました");
-};
+  // ★確実にグローバルへ出す
+  window.run = run;
+  window.copyResult = copyResult;
+  window.shareResult = shareResult;
+
+})();
