@@ -1,12 +1,78 @@
 body {
   margin: 0;
-  min-height: 100vh;
+  font-family: "Arial Black", "Noto Sans JP", sans-serif;
+  background: #0f0f0f;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100dvh;
+}
+
+.container {
+  width: 390px;
+  height: 100dvh;
+  background: #111;
+  padding: 24px;
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  text-align: center;
+  opacity: 0.7;
+  margin-bottom: 10px;
+}
+
+.center {
+  flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  background: #0b0b0f;
-  color: white;
   text-align: center;
-  padding: 20px;
+}
+
+.level {
+  font-size: 64px;
+  color: #ff4d4d;
+  font-weight: 900;
+}
+
+.nickname {
+  font-size: 36px;
+  margin-top: 10px;
+}
+
+.text {
+  margin-top: 20px;
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  margin-top: auto;
+  padding-bottom: 10px;
+}
+
+button {
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  font-weight: bold;
+}
+
+.primary {
+  background: #ff4d4d;
+  color: white;
+}
+
+.secondary {
+  background: #2a2a2a;
+  color: white;
 }
