@@ -1,5 +1,15 @@
+console.log("engine loaded");
+
 let current = null;
 let isRunning = false;
+
+// 安全に参照（未定義で死なないようにする）
+const data = window.data || [];
+const loadingMessages = window.loadingMessages || [
+  "診断中...",
+  "解析中...",
+  "サボり指数計算中..."
+];
 
 function pickResult() {
   const r = Math.random();
@@ -9,7 +19,13 @@ function pickResult() {
   else if (r < 0.05) rank = "SR";
   else if (r < 0.2) rank = "R";
 
-  const pool = window.data.filter(d => d.rank === rank);
+  const pool = data.filter(d => d.rank === rank);
+
+  // ★空対策（ここ重要）
+  if (pool.length === 0) {
+    return data[Math.floor(Math.random() * data.length)];
+  }
+
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
@@ -29,22 +45,27 @@ function run() {
   nickname.textContent = "---";
   text.textContent = "ボタンを押してね";
 
-  loading.classList.remove("hidden");
-  loadingText.classList.remove("hidden");
+  // ロード表示
+  if (loading) loading.classList.remove("hidden");
+  if (loadingText) loadingText.classList.remove("hidden");
+
+  loadingText.textContent = "";
 
   const interval = setInterval(() => {
     loadingText.textContent =
       loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
-  }, 200);
+  }, 180);
 
   setTimeout(() => {
     clearInterval(interval);
 
     const result = pickResult();
 
-    loading.classList.add("hidden");
-    loadingText.classList.add("hidden");
+    // ロード終了
+    if (loading) loading.classList.add("hidden");
+    if (loadingText) loadingText.classList.add("hidden");
 
+    // 表示
     current = result;
 
     level.textContent = "Lv " + result.level;
@@ -71,9 +92,8 @@ ${current.text}`
 function shareResult() {
   if (!current) return;
 
-  navigator.clipboard.writeText(
-    `${location.href.split('?')[0]}?id=${current.id}`
-  );
+  const url = `${location.origin}${location.pathname}?id=${current.id}`;
+  navigator.clipboard.writeText(url);
 
   alert("URLコピーしました");
 }
