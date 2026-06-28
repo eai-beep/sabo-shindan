@@ -3,445 +3,487 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>サボり度診断 MAX</title>
-
-<!-- 画面を画像化するライブラリ -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
+<title>Sabori Combo Selector Pro</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
+:root {
+  --bg-color: #06060c;
+  --card-bg: #0d0d1a;
+  --border-color: #1e1e38;
+  --accent-blue: #00bfff;
+  --accent-magenta: #ff1493;
+  --accent-amber: #ffaa00;
+  --text-main: #ffffff;
+  --text-muted: #555577;
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: #0b0b12;
-  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
-  background-size: 16px 16px;
-  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg-color);
+  color: var(--text-main);
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  padding: 12px; /* 縦幅削減のため少し狭く */
+  padding: 16px;
   box-sizing: border-box;
 }
 
-.container {
+.app-container {
   width: 100%;
-  max-width: 380px; /* 横幅を少しシャープにして縦伸びを防ぐ */
+  max-width: 380px;
+  position: relative;
 }
 
-/* アプリタイトル */
-.app-main-title {
+.app-header {
   text-align: center;
-  font-size: 14px;
-  font-weight: bold;
-  letter-spacing: 2px;
-  color: #5a5a7a;
-  margin-bottom: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: var(--accent-blue);
+  margin-bottom: 16px;
+  text-transform: uppercase;
 }
 
-/* 🎴 カード：全体的にパディングを削ってコンパクト化 */
-.card-wrapper {
-  background: #131322;
-  border: 2px solid #23233b;
+/* 🎴 メインコンテンツカード */
+.display-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   border-radius: 16px;
-  padding: 16px 20px; /* 上下左右をスリムに */
+  padding: 24px;
   box-sizing: border-box;
-  box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
   position: relative;
   overflow: hidden;
-  margin-bottom: 12px; /* 下の余白を縮小 */
+  margin-bottom: 16px;
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
 
-/* ランク別カラー */
-.card-wrapper.rank-N { border-color: #4a4a6a; }
-.card-wrapper.rank-R { border-color: #00d2ff; box-shadow: 0 0 15px rgba(0,210,255,0.2); }
-.card-wrapper.rank-SR { border-color: #ff007b; box-shadow: 0 0 20px rgba(255,0,123,0.25); }
-.card-wrapper.rank-SSR { 
-  border-color: #ffb700; 
-  background: linear-gradient(135deg, #131322 0%, #2b200a 100%);
-  box-shadow: 0 0 25px rgba(255,183,0,0.3);
+/* レア度別クラス */
+.display-card.tier-normal { border-color: #202040; }
+.display-card.tier-rare   { border-color: var(--accent-blue); box-shadow: 0 0 15px rgba(0, 191, 255, 0.15); }
+.display-card.tier-epic   { border-color: var(--accent-magenta); box-shadow: 0 0 15px rgba(255, 20, 147, 0.15); }
+.display-card.tier-legend { 
+  border-color: var(--accent-amber); 
+  background: linear-gradient(145deg, #0d0d1a 0%, #1a1202 100%);
+  box-shadow: 0 0 25px rgba(255, 170, 0, 0.25); 
 }
 
-/* カードヘッダー */
-.card-header-title {
-  font-size: 16px;
+/* ⚡️ LEGEND当選時の品のあるライトフラッシュ */
+@keyframes softFlash {
+  0% { background: #fff; opacity: 0.5; }
+  100% { background: transparent; opacity: 0; }
+}
+.flash-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+.flash-layer.trigger {
+  animation: softFlash 0.4s ease-out forwards;
+}
+
+.card-info {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-muted);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 16px;
+}
+
+.title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.status-badge {
+  font-size: 9px;
   font-weight: 800;
-  color: #fff;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 2px solid rgba(255,255,255,0.06);
-  padding-bottom: 8px;
-  margin-bottom: 12px;
+  padding: 4px 8px;
+  background: #161630;
+  color: #666688;
+  border-radius: 4px;
+  letter-spacing: 1px;
 }
-.card-header-title span { font-size: 11px; color: #5a5a7a; font-weight: normal; }
+.tier-rare .status-badge   { background: var(--accent-blue); color: #000; }
+.tier-epic .status-badge   { background: var(--accent-magenta); color: #fff; }
+.tier-legend .status-badge { background: var(--accent-amber); color: #000; }
 
-/* メイン表示（レベルとバッジ） */
-.main-display {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
+.level-value {
+  font-size: 34px;
+  font-weight: 800;
+  font-family: monospace, sans-serif;
+  line-height: 1;
+  color: #2a2a44;
 }
+.tier-rare .level-value   { color: var(--accent-blue); text-shadow: 0 0 8px rgba(0,191,255,0.2); }
+.tier-epic .level-value   { color: var(--accent-magenta); text-shadow: 0 0 8px rgba(255,20,147,0.2); }
+.tier-legend .level-value { color: var(--accent-amber); text-shadow: 0 0 12px rgba(255,170,0,0.3); }
 
-.rank-badge {
-  font-size: 12px;
-  font-weight: 900;
-  padding: 4px 10px;
-  background: #23233b;
-  color: #a0a0c0;
-  border-radius: 6px;
-}
-.rank-R .rank-badge { background: #00d2ff; color: #000; }
-.rank-SR .rank-badge { background: #ff007b; color: #fff; }
-.rank-SSR .rank-badge { background: #ffb700; color: #000; animation: bounce 0.6s infinite alternate; }
-
-@keyframes bounce {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-3px); }
+.content-name {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  min-height: 24px;
+  line-height: 1.4;
 }
 
-/* 縮小：レベル文字を 72px → 52px にダイエット */
-.level-zone { line-height: 1; }
-.level-num {
-  font-size: 52px;
-  font-weight: 900;
-  font-family: 'Impact', 'Arial Black', sans-serif;
-  color: #4a4a6a; /* 未実行時はグレー */
-}
-.rank-N .level-num { color: #fff; }
-.rank-R .level-num { color: #00d2ff; }
-.rank-SR .level-num { color: #ff007b; }
-.rank-SSR .level-num { color: #ffb700; text-shadow: 0 0 15px rgba(255,183,0,0.4); }
-
-/* 二つ名 */
-.nickname {
-  font-size: 22px;
-  font-weight: 900;
-  margin-bottom: 12px;
-  color: #fff;
-}
-.rank-SSR .nickname { color: #ffb700; }
-
-/* メーター領域もコンパクトに */
-.status-monitor {
-  background: rgba(0,0,0,0.2);
-  border-radius: 10px;
-  padding: 10px 14px;
-  margin-bottom: 12px;
-}
-.status-row { margin-bottom: 8px; }
-.status-row:last-child { margin-bottom: 0; }
-.status-meta {
-  display: flex;
-  justify-content: space-between;
-  font-size: 11px;
-  color: #8a8ab5;
-  margin-bottom: 4px;
-}
-.status-bar-bg {
-  height: 6px;
-  background: #1a1a2e;
-  border-radius: 3px;
-  overflow: hidden;
-}
-.status-bar-fill {
-  height: 100%;
-  width: 0%; /* 初期値はJSおよびHTML側で0%に固定 */
-  background: #3a3a5a;
-  border-radius: 3px;
-  transition: width 0.6s cubic-bezier(0.1, 1, 0.1, 1);
-}
-.rank-R .status-bar-fill { background: #00d2ff; }
-.rank-SR .status-bar-fill { background: #ff007b; }
-.rank-SSR .status-bar-fill { background: linear-gradient(90deg, #ff5500, #ffb700); }
-
-/* 解説テキスト */
-.analysis-text {
-  font-size: 13px;
-  line-height: 1.5;
-  color: #a5a5b5;
-  background: rgba(255,255,255,0.02);
-  padding: 10px 12px;
+/* 🎰 スロット演出用エリア */
+.content-text {
+  background: rgba(0, 0, 0, 0.3);
   border-radius: 8px;
+  padding: 16px;
+  font-size: 13px;
+  line-height: 1.6;
+  font-weight: 500;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  color: #ccccdd;
 }
 
-/* 🕹️ ボタン配置の大手術：シェアと保存を横並びにして縦幅カット！ */
-button {
+.shuffle-active {
+  animation: visualBlur 0.05s infinite alternate;
+  color: #555577 !important;
+}
+@keyframes visualBlur {
+  0% { transform: scale(0.99); opacity: 0.7; }
+  100% { transform: scale(1.01); opacity: 0.8; }
+}
+
+/* 📈 インタラクションボタン */
+.interaction-cluster {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.action-trigger {
+  background: #111124;
+  border: 1px solid #222244;
+  color: #7777aa;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+.action-trigger:hover { background: #181835; color: #fff; }
+
+.btn-rate { border-color: var(--accent-blue); color: var(--accent-blue); background: rgba(0, 191, 255, 0.01); }
+.btn-link { border-color: var(--accent-magenta); color: var(--accent-magenta); background: rgba(255, 20, 147, 0.01); }
+.btn-share { border-color: var(--accent-amber); color: var(--accent-amber); background: rgba(255, 170, 0, 0.01); }
+
+/* 🎲 メインボタン */
+.main-trigger {
   width: 100%;
-  padding: 14px;
+  padding: 16px;
+  background: linear-gradient(135deg, var(--accent-blue), #5f4bdf);
+  color: #fff;
   border: none;
   border-radius: 10px;
-  font-size: 15px;
-  font-weight: bold;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
   cursor: pointer;
-  box-sizing: border-box;
-  transition: all 0.1s ease;
+  box-shadow: 0 4px 12px rgba(0, 191, 255, 0.15);
 }
-button:active { transform: scale(0.98); }
-
-.btn-main {
-  background: linear-gradient(135deg, #00d2ff, #0088ff);
-  color: #fff;
-  box-shadow: 0 4px 12px rgba(0,136,255,0.25);
-  margin-bottom: 8px;
-}
-.rank-SR-active .btn-main { background: linear-gradient(135deg, #ff007b, #9900ff); box-shadow: 0 4px 12px rgba(255,0,123,0.25); }
-.rank-SSR-active .btn-main { background: linear-gradient(135deg, #ffb700, #ff5500); box-shadow: 0 4px 12px rgba(255,183,0,0.25); }
-
-/* 横並びボタン用のコンテナ */
-.btn-group {
-  display: flex;
-  gap: 8px;
-}
-.btn-save {
-  background: #23233b;
-  color: #fff;
-  border: 1px solid #33335c;
-  font-size: 13px;
-  padding: 12px;
-}
-.btn-share {
-  background: #fff;
-  color: #000;
-  font-size: 13px;
-  padding: 12px;
-  box-shadow: 0 4px 10px rgba(255,255,255,0.1);
+.main-trigger:disabled {
+  background: #1a1a26;
+  box-shadow: none;
+  color: #444455;
+  cursor: not-allowed;
 }
 
-/* 演出レイヤー */
-#loading, #ssrOverlay {
-  position: fixed;
-  inset: 0;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  background: #0b0b12;
-  z-index: 100;
+.system-status {
+  text-align: center;
+  font-size: 9px;
+  color: var(--text-muted);
+  margin-top: 12px;
+  letter-spacing: 0.5px;
 }
-#loading.active, #ssrOverlay.active { display: flex; }
-#loadingText { font-size: 16px; font-weight: bold; color: #00d2ff; }
-#ssrOverlay { font-size: 32px; font-weight: 900; color: #ffb700; text-shadow: 0 0 20px #ffb700; z-index: 200; opacity: 0; transition: opacity 0.2s; }
-#ssrOverlay.show { opacity: 1; }
 
-.shake { animation: light-shake 0.3s ease; }
-.flash { animation: screen-flash 0.3s ease-out; }
-@keyframes light-shake {
-  0%, 100% { transform: translate(0,0); }
-  20%, 60% { transform: translate(-3px, 1px); }
-  40%, 80% { transform: translate(3px, -1px); }
+/* 📈 数値ポップアップ */
+@keyframes scoreFloat {
+  0% { transform: translateY(0) scale(0.8); opacity: 0; }
+  20% { opacity: 1; transform: translateY(-10px) scale(1.1); }
+  100% { transform: translateY(-28px) scale(1); opacity: 0; }
 }
-@keyframes screen-flash {
-  0% { background: #ffffff; opacity: 0.2; }
-  100% { background: #0b0b12; opacity: 1; }
+.value-popup {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  font-weight: 700;
+  font-size: 14px;
+  pointer-events: none;
+  animation: scoreFloat 0.5s ease-out forwards;
+  z-index: 50;
+}
+
+/* ⚙️ 最適化用シークレットボタン（最下部に超薄く配置） */
+.admin-panel {
+  text-align: center;
+  margin-top: 30px;
+  opacity: 0.1;
+  transition: opacity 0.3s;
+}
+.admin-panel:hover { opacity: 0.8; }
+.admin-btn {
+  background: none;
+  border: 1px solid #ff1493;
+  color: #ff1493;
+  font-size: 9px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
 }
 </style>
 </head>
+<body>
 
-<body class="rank-ready">
+<div class="app-container">
+  <div class="app-header">Sabori Combo Selector</div>
 
-<div id="loading">
-  <div id="loadingText">サボり遺伝子をスキャン中...</div>
-</div>
-
-<div id="ssrOverlay">✨ SSR神確定 ✨</div>
-
-<div class="container">
-
-  <div class="app-main-title">SABORI CHECKER</div>
-
-  <!-- 📸 初期状態を完全に「未実行状態」にリセットしました -->
-  <div class="card-wrapper rank-N" id="diagnosticCard">
-    
-    <div class="card-header-title">
-      サボり度診断
-      <span id="serialNo">#000000</span>
+  <div class="display-card tier-normal" id="contentCard">
+    <div class="flash-layer" id="flashOverlay"></div>
+    <div class="card-info">
+      <span id="poolCounter">POOL: -- / --</span>
+      <span id="itemId">ID: ---</span>
     </div>
     
-    <div class="main-display">
-      <div class="rank-badge" id="badge">RANK --</div>
-      <div class="level-zone">
-        <span class="level-num" id="level">--</span>
-      </div>
+    <div class="title-row">
+      <div class="status-badge" id="itemTier">READY</div>
+      <div class="level-value" id="itemLevel">Lv--</div>
     </div>
 
-    <div class="nickname" id="nickname">診断未実行</div>
-    
-    <div class="status-monitor">
-      <div class="status-row">
-        <div class="status-meta"><span>スマホ依存度</span><span id="valA">0%</span></div>
-        <div class="status-bar-bg"><div class="status-bar-fill" id="barA" style="width: 0%;"></div></div>
-      </div>
-      <div class="status-row">
-        <div class="status-meta"><span>現実逃避癖</span><span id="valB">0%</span></div>
-        <div class="status-bar-bg"><div class="status-bar-fill" id="barB" style="width: 0%;"></div></div>
-      </div>
-      <div class="status-row">
-        <div class="status-meta"><span>労働拒否指数</span><span id="valC">0%</span></div>
-        <div class="status-bar-bg"><div class="status-bar-fill" id="barC" style="width: 0%;"></div></div>
-      </div>
-    </div>
+    <div class="content-name" id="itemName">同期中...</div>
+    <div class="content-text" id="contentText">データベースからアクティブなサボりコンボを読み込んでいます。</div>
 
-    <div class="analysis-text" id="text">「診断する」ボタンを押して、あなたの脳内サボり度を定量計測してください。</div>
+    <div class="interaction-cluster">
+      <button class="action-trigger btn-rate" onclick="processRating(1, this, 'accent-blue')">それな！ (+1)</button>
+      <button class="action-trigger btn-link" onclick="handleLinkClick(this)">詳細URLを開く (+3)</button>
+      <button class="action-trigger btn-share" onclick="handleShare(this)">結果をシェア (+5)</button>
+    </div>
   </div>
 
-  <!-- 🕹️ 操作ボタン：綺麗に1画面に収まる構造に変更 -->
-  <button class="btn-main" id="mainBtn" onclick="run()">診断する</button>
-  
-  <div class="btn-group">
-    <button class="btn-save" onclick="saveAsImage()">画像として保存</button>
-    <button class="btn-share" onclick="shareResult()">結果をシェア</button>
-  </div>
+  <button class="main-trigger" id="actionBtn" onclick="executeShuffle()" disabled>接続中...</button>
+  <div class="system-status" id="sysStatus">Initializing Connection...</div>
 
+  <div class="admin-panel">
+    <button class="admin-btn" onclick="maintainEcosystem()">プールを最適化（下位30枠の新陳代謝を執行）</button>
+  </div>
 </div>
 
 <script>
-const data = [
-  { id: 1, level: 1, rank: "N", name: "起動前人間", text: "まだ何もしてないのに疲れている状態。脳のメインシステムが立ち上がる前に1日の限界を迎える、究極の省エネモード生命体。", bars: [25, 10, 85] },
-  { id: 5, level: 5, rank: "N", name: "軽休憩民", text: "「5分だけ休む」の5分が本編。本業と休憩の主客転倒が深刻化しており、作業を再開するためのエネルギーを休憩で消費するタイプ。", bars: [45, 55, 60] },
-  { id: 10, level: 10, rank: "R", name: "スマホ吸引体", text: "強力な磁場に引かれるように、無意識下で右手がスマホをホールドする特異体質。スクリーンタイムは驚異の2桁へ突入寸前。", bars: [98, 40, 50] },
-  { id: 20, level: 20, rank: "R", name: "動画中毒者", text: "「あと1本」という甘美な嘘を自分に吐き続ける無限ループの囚人。縦型ショート動画のアルゴリズムに完全に脳をハックされている。", bars: [92, 75, 70] },
-  { id: 50, level: 50, rank: "SR", name: "現実逃避マスター", text: "重要タスクが目の前に迫ると脳が非常事態を検知。突如として部屋の大掃除や、どうでもいい調べ物を開始する逃避界のプロフェッショナル。", bars: [65, 99, 85] },
-  { id: 99, level: 99, rank: "SSR", name: "サボり神", text: "高次元へのアセンションを遂げた結果、脳内から「努力」の概念が完全アンインストールされた存在。生きているだけで時空をサボらせる絶対神。", bars: [99, 99, 99] }
-];
+// 🔑 【重要】あなたのSupabaseの接続情報に書き換えてください
+const SUPABASE_URL = "https://YOUR_PROJECT_ID.supabase.co";
+const SUPABASE_ANON_KEY = "YOUR_ANON_KEY";
 
-const loadingMessages = ["スキャン中...", "解析中...", "ログ抽出中...", "照合中..."];
-let state = "idle";
-let loadingInterval;
-let lastResult = null;
+const supabase = { integrity: false };
+let activePool = [];
+let currentItem = null;
 
-window.addEventListener("DOMContentLoaded", () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const sharedId = urlParams.get("id");
-  if (sharedId) {
-    const sharedData = data.find(item => item.id == sharedId);
-    if (sharedData) {
-      lastResult = sharedData;
-      showResult(sharedData);
+// 接続の初期化
+const sbClient = supabasejs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// 🔁 起動時：Supabaseから「現在アクティブ（is_active = true）」の100個を瞬時に取得
+async function fetchActivePool() {
+  try {
+    const { data, error } = await sbClient
+      .from('sabori_items')
+      .select('*')
+      .eq('is_active', true);
+
+    if (error) throw error;
+
+    activePool = data;
+    document.getElementById("poolCounter").textContent = `ACTIVE POOL: ${activePool.length}`;
+    document.getElementById("itemName").textContent = "システムスタンバイ";
+    document.getElementById("contentText").textContent = "抽出ボタンを押すと、レア度に応じた傾斜確率でコンボが選出されます。";
+    document.getElementById("actionBtn").textContent = "コンテンツを抽出";
+    document.getElementById("actionBtn").disabled = false;
+    document.getElementById("sysStatus").textContent = "クラウドデータベース同期完了";
+  } catch (err) {
+    console.error(err);
+    document.getElementById("sysStatus").textContent = "接続エラー。設定を確認してください。";
+  }
+}
+
+// 🎰 レア度に応じた「重み付き抽選」スロット演出
+function executeShuffle() {
+  if (activePool.length === 0) return;
+
+  const btn = document.getElementById("actionBtn");
+  const targetText = document.getElementById("contentText");
+  const targetName = document.getElementById("itemName");
+  
+  btn.disabled = true;
+  targetText.classList.add("shuffle-active");
+
+  let ticks = 0;
+  let timer = setInterval(() => {
+    let preview = activePool[Math.floor(Math.random() * activePool.length)];
+    targetName.textContent = preview.name;
+    targetText.textContent = preview.text;
+    ticks++;
+    
+    if (ticks > 12) {
+      clearInterval(timer);
+      targetText.classList.remove("shuffle-active");
+      
+      // 🎲 確率の傾斜システム（Normal:60%, Rare:25%, Epic:12%, Legend:3%）
+      currentItem = calculateWeightedSelection();
+      renderSelection(currentItem);
+      
+      // 表示回数(Imp)をクラウド上へバックグラウンドで+1加算
+      reportImpression(currentItem.id, currentItem.imp);
+      btn.disabled = false;
+    }
+  }, 60);
+}
+
+// 🎰 重み付き抽選アルゴリズムのコア
+function calculateWeightedSelection() {
+  const weights = { 'Normal': 60, 'Rare': 25, 'Epic': 12, 'Legend': 3 };
+  
+  // 現在プール内にある全データの総ウェイトを計算
+  let totalWeight = 0;
+  const poolWithWeights = activePool.map(item => {
+    const w = weights[item.tier] || 10;
+    totalWeight += w;
+    return { item, accumulated: totalWeight };
+  });
+
+  const rarifiedTarget = Math.random() * totalWeight;
+  for (const obj of poolWithWeights) {
+    if (rarifiedTarget <= obj.accumulated) {
+      return obj.item;
     }
   }
-});
+  return activePool[0];
+}
 
-function run() {
-  if (state !== "idle") return;
-  state = "loading";
+// ⚙️ 画面への確定反映 ＆ 「100レベル＋補正値」の自動計算
+function renderSelection(item) {
+  const card = document.getElementById("contentCard");
+  const flash = document.getElementById("flashOverlay");
   
-  startLoading(() => {
-    const result = data[Math.floor(Math.random() * data.length)];
-    lastResult = result;
+  // 補正値マトリクス
+  const tierModifiers = { 'Normal': 0, 'Rare': 100, 'Epic': 200, 'Legend': 300 };
+  const modifier = tierModifiers[item.tier] || 0;
+  const finalLevel = item.base_level + modifier; // 🧠 Claudeの脳内基準を狂わせない自動足し算
 
-    // URLを書き換える
-    const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + `?id=${result.id}`;
-    window.history.pushState({ path: newUrl }, '', newUrl);
+  card.className = `display-card tier-${item.tier.toLowerCase()}`;
+  document.getElementById("itemId").textContent = `ID: ${String(item.id).padStart(3, '0')}`;
+  document.getElementById("itemTier").textContent = item.tier.toUpperCase();
+  document.getElementById("itemLevel").textContent = `Lv ${finalLevel}`;
+  document.getElementById("itemName").textContent = item.name;
+  document.getElementById("contentText").textContent = item.text;
 
-    playFx(result, () => {
-      showResult(result);
-      state = "idle";
-    });
-  });
+  // Legend（3%）を引いた時だけ気品あるライトフラッシュをトリガー
+  flash.classList.remove("trigger");
+  if (item.tier === "Legend") {
+    void flash.offsetWidth;
+    flash.classList.add("trigger");
+  }
 }
 
-function startLoading(done) {
-  const loading = document.getElementById("loading");
-  const text = document.getElementById("loadingText");
-  loading.classList.add("active");
-
-  let i = 0;
-  text.textContent = loadingMessages[0];
-  loadingInterval = setInterval(() => {
-    i++;
-    text.textContent = loadingMessages[i % loadingMessages.length];
-  }, 150);
-
-  setTimeout(() => {
-    clearInterval(loadingInterval);
-    loading.classList.remove("active");
-    done();
-  }, 1000);
+// 📈 クラウドへのインプレッション（表示回数）送信
+async function reportImpression(id, currentImp) {
+  await sbClient.from('sabori_items').update({ imp: currentImp + 1 }).eq('id', id);
+  // ローカルデータも同期
+  const local = activePool.find(p => p.id === id);
+  if (local) local.imp++;
 }
 
-function showResult(r) {
-  const card = document.getElementById("diagnosticCard");
-  const container = document.body;
-  card.className = "card-wrapper rank-" + r.rank;
+// 📈 各アクションと連動したリアルタイムスコアリング
+async function processRating(points, element, colorVariable) {
+  if (!currentItem) return;
   
-  container.className = `rank-${r.rank}-active`;
+  // クラウドのスコアをリアルタイム更新
+  const updatedScore = currentItem.score + points;
+  await sbClient.from('sabori_items').update({ score: updatedScore }).eq('id', currentItem.id);
+  
+  // ローカルデータも同期
+  currentItem.score = updatedScore;
 
-  const pseudoSerial = "#" + Math.floor(Math.random() * 900000 + 100000);
-  document.getElementById("serialNo").textContent = pseudoSerial;
-
-  document.getElementById("badge").textContent = "RANK " + r.rank;
-  document.getElementById("level").textContent = "Lv " + r.level;
-  document.getElementById("nickname").textContent = r.name;
-  document.getElementById("text").textContent = r.text;
-
-  document.getElementById("barA").style.width = r.bars[0] + "%";
-  document.getElementById("barB").style.width = r.bars[1] + "%";
-  document.getElementById("barC").style.width = r.bars[2] + "%";
-  document.getElementById("valA").textContent = r.bars[0] + "%";
-  document.getElementById("valB").textContent = r.bars[1] + "%";
-  document.getElementById("valC").textContent = r.bars[2] + "%";
+  // 視覚ポップアップ演出
+  const popup = document.createElement("div");
+  popup.className = "value-popup";
+  popup.style.color = `var(--${colorVariable})`;
+  popup.textContent = `+${points}`;
+  element.appendChild(popup);
+  setTimeout(() => popup.remove(), 500);
 }
 
-function playFx(result, callback) {
-  document.body.classList.add("shake", "flash");
-  setTimeout(() => document.body.classList.remove("shake", "flash"), 400);
-
-  if (result.rank === "SSR") {
-    playSSR(callback);
-  } else {
-    callback();
-  }
+function handleLinkClick(btn) {
+  if (!currentItem) return;
+  processRating(3, btn, 'accent-magenta');
+  setTimeout(() => { window.open("https://www.tiktok.com", "_blank"); }, 250);
 }
 
-function playSSR(callback) {
-  const overlay = document.getElementById("ssrOverlay");
-  overlay.classList.add("active");
-  setTimeout(() => overlay.classList.add("show"), 10);
-
-  setTimeout(() => {
-    overlay.classList.remove("show");
-    setTimeout(() => {
-      overlay.classList.remove("active");
-      callback();
-    }, 200);
-  }, 1000);
+function handleShare(btn) {
+  if (!currentItem) return;
+  processRating(5, btn, 'accent-amber');
+  
+  const tierModifiers = { 'Normal': 0, 'Rare': 100, 'Epic': 200, 'Legend': 300 };
+  const finalLv = currentItem.base_level + (tierModifiers[currentItem.tier] || 0);
+  
+  let shareText = encodeURIComponent(`【Sabori Combo Selector】\n[${currentItem.name}] (Lv.${finalLv})\n「${currentItem.text}」\n#サボりコンボ\n`);
+  setTimeout(() => { window.open(`https://twitter.com/intent/tweet?text=${shareText}`, "_blank"); }, 250);
 }
 
-function saveAsImage() {
-  if (!lastResult) {
-    alert("診断を実行してください。");
-    return;
-  }
-  const card = document.getElementById("diagnosticCard");
-  html2canvas(card, {
-    backgroundColor: "#0b0b12",
-    scale: 2,
-    logging: false,
-    useCORS: true
-  }).then(canvas => {
-    const imageData = canvas.toDataURL("image/png");
-    const link = document.createElement("a");
-    link.href = imageData;
-    link.download = `SABORI_LV${lastResult.level}.png`;
-    link.click();
-  }).catch(err => {
-    alert("画像生成失敗。スクショを推奨します。");
+// 🌊 【自動進化・新陳代謝アルゴリズム】
+// 複数人の同時アクセスでデータが壊れるのを防ぐため、あなたが最下部のボタンをポチッと押した瞬間にクラウド側で30枠が美しく入れ替わります。
+async function maintainEcosystem() {
+  if (!confirm("プール内の下位30枠の新陳代謝（入れ替え）を実行しますか？")) return;
+  document.getElementById("sysStatus").textContent = "最適化アルゴリズム実行中...";
+
+  // 1. 全データを取得
+  const { data: allItems, error } = await sbClient.from('sabori_items').select('*');
+  if (error) return alert("エラーが発生しました");
+
+  let actives = allItems.filter(i => i.is_active);
+  let reserves = allItems.filter(i => !i.is_active);
+
+  // 2. コスパ（スコア / 表示回数）を計算してソート。
+  // ただし、表示回数が2回以下の「新ネタ」は評価が定まっていないため強制残留（保護）
+  actives.sort((a, b) => {
+    let scoreA = a.imp >= 3 ? (a.score / a.imp) : 9999; // 保護対象は超高評価扱い
+    let scoreB = b.imp >= 3 ? (b.score / b.imp) : 9999;
+    return scoreA - scoreB;
   });
+
+  // 下位30個を特定してパージ（非アクティブ化 ＆ 数値リセット）
+  let outgoers = actives.slice(0, 30);
+  for (let item of outgoers) {
+    await sbClient.from('sabori_items').update({ is_active: false, score: 0, imp: 0 }).eq('id', item.id);
+  }
+
+  // 3. 待機プールから新鮮な30個をランダムに選出してアクティブ化
+  reserves.sort(() => 0.5 - Math.random());
+  let incomers = reserves.slice(0, 30);
+  for (let item of incomers) {
+    await sbClient.from('sabori_items').update({ is_active: true, score: 0, imp: 0 }).eq('id', item.id);
+  }
+
+  alert("新陳代謝が完了しました！ページをリロードします。");
+  location.reload();
 }
 
-function shareResult() {
-  if (!lastResult) {
-    alert("データがありません。");
-    return;
-  }
-  const shareUrl = window.location.href;
-  const text = `【サボり度診断 MAX】\n結果：${lastResult.name} (Lv ${lastResult.level})\n\n👇ここでサボり度を計測する\n${shareUrl}`;
-  navigator.clipboard.writeText(text).then(() => {
-    alert("URLコピー完了！SNSに貼り付けてね！");
-  });
-}
+// 起動
+fetchActivePool();
 </script>
-
 </body>
 </html>
